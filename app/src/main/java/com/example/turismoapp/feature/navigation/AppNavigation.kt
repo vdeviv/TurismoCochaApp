@@ -19,12 +19,13 @@ fun AppNavigation() {
         composable(Screen.Login.route) {
             LoginScreen(
                 onSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Github.route) { // o Home/Profile
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )
         }
+
         composable(Screen.Home.route) {
             // HomeScreen()
         }
