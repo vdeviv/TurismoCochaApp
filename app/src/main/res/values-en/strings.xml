@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TurismoApp</string>
+    <string name="login_title">Sign in</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Sign in</string>
+
+    <string name="home_welcome_text">Welcome back %s!</string>
+    <string name="gitalias_input">Enter the GitHub account</string>
+    <string name="gitalias_btn_find">Find</string>
+</resources>
