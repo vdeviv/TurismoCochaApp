@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.turismoapp.presentation.GitHubScreen
+import com.example.turismoapp.feature.navigation.AppNavigation
+import com.example.turismoapp.feature.github.presentation.GitHubScreen
 import com.example.turismoapp.ui.theme.TurismoAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,11 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TurismoAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GitHubScreen(modifier = Modifier.padding(innerPadding))
-                }
-            }
+            AppNavigation()
         }
     }
 }

@@ -1,7 +1,8 @@
-package com.example.turismoapp.data.repository
+package com.example.turismoapp.feature.github.data.repository
 
-import com.example.turismoapp.domain.model.UserModel
-import com.example.turismoapp.domain.model.repository.IGithubRepository
+import com.example.turismoapp.feature.github.domain.model.UserModel
+import com.example.turismoapp.feature.github.domain.model.repository.IGithubRepository
+
 
 class GithubRepository: IGithubRepository {
     override fun findByNick(value: String): Result<UserModel> {

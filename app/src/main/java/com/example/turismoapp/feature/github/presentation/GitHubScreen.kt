@@ -1,4 +1,4 @@
-package com.example.turismoapp.presentation
+package com.example.turismoapp.feature.github.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.OutlinedButton
