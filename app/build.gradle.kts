@@ -63,12 +63,11 @@ dependencies {
     implementation(libs.koin.androidx.compose)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.coil)
+    //implementation(libs.coil)
 
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.github.bumptech.glide:glide:5.0.0-rc01")
-
-    implementation("io.insert-koin:koin-core:4.1.1")
+    implementation(libs.retrofit)
+    //implementation(libs.glide)
     implementation(libs.compose.navigation)
 
 }
+
