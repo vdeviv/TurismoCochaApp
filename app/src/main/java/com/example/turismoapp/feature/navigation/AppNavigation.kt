@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.turismoapp.feature.dollar.presentation.DollarScreen
 import com.example.turismoapp.feature.login.presentation.CartScreen
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 
@@ -35,6 +36,10 @@ fun AppNavigation() {
 
         composable(Screen.Cart.route) {
             CartScreen()
+        }
+
+            composable(Screen.Dollar.route) {
+                DollarScreen()
         }
     }
 }
