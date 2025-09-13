@@ -2,7 +2,6 @@ package com.example.turismoapp.feature.dollar.datasource
 
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError

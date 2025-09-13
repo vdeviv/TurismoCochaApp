@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -68,6 +69,14 @@ dependencies {
     implementation(libs.retrofit)
     //implementation(libs.glide)
     implementation(libs.compose.navigation)
+
+    //local bundle room
+    implementation(libs.bundles.local)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+    testImplementation(libs.room.testing)
+
+
 
 }
 
