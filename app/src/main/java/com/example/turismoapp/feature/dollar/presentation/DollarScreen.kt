@@ -13,20 +13,17 @@ import com.example.turismoapp.feature.dollar.presentation.DollarViewModel
 @Composable
 fun DollarScreen(viewModelDollar: DollarViewModel = koinViewModel()) {
     val state = viewModelDollar.uiState.collectAsState()
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         when (val stateValue = state.value) {
             is DollarViewModel.DollarUIState.Error -> Text(stateValue.message)
-
-            is DollarViewModel.DollarUIState.Loading ->CircularProgressIndicator()
-
+            DollarViewModel.DollarUIState.Loading -> CircularProgressIndicator()
             is DollarViewModel.DollarUIState.Success -> {
-                Text(stateValue.data.dolarOficial)
-                Text(stateValue.data.dolarParalelo)
+                stateValue.data.dolarOficial?.let { Text(it) }
+                stateValue.data.dolarParalelo?.let { Text(it) }
             }
         }
     }
