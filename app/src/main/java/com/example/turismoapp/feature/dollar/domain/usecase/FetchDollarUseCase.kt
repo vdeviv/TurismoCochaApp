@@ -5,7 +5,7 @@ import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository
 import kotlinx.coroutines.flow.Flow
 
 class FetchDollarUseCase(
-    val repository: IDollarRepository
+    private val repository: IDollarRepository
 ) {
     suspend fun invoke(): Flow<DollarModel> {
         return repository.getDollar()

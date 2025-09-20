@@ -4,6 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.turismoapp.feature.dollar.data.repository.DollarRepository
+import com.example.turismoapp.feature.dollar.datasource.DollarLocalDataSource
+import com.example.turismoapp.feature.dollar.datasource.RealTimeRemoteDataSource
+import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository
+import com.example.turismoapp.feature.dollar.domain.usecase.FetchDollarUseCase
+import com.example.turismoapp.feature.dollar.presentation.DollarViewModel
 import com.example.turismoapp.feature.navigation.AppNavigation
 import com.example.turismoapp.ui.theme.TurismoAppTheme
 import org.koin.android.ext.koin.androidContext
@@ -35,10 +41,17 @@ class MainActivity : ComponentActivity() {
 
     // Define tu módulo de Koin aquí
     private val appModule: Module = module {
-        // Registrar FetchDollarUseCase
-        single { com.example.turismoapp.feature.dollar.domain.usecase.FetchDollarUseCase(get()) }
+        // Registrar las fuentes de datos
+        single { DollarLocalDataSource(get()) }
+        single { RealTimeRemoteDataSource() }
 
-        // Registrar DollarViewModel
-        viewModel { com.example.turismoapp.feature.dollar.presentation.DollarViewModel(fetchDollarUseCase = get()) }
+        // Registrar el repositorio, inyectando las dependencias necesarias
+        single<IDollarRepository> { DollarRepository(get(), get()) }
+
+        // Registrar FetchDollarUseCase
+        single { FetchDollarUseCase(get()) }
+
+        // Registrar el ViewModel
+        viewModel { DollarViewModel(fetchDollarUseCase = get()) }
     }
 }
