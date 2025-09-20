@@ -12,31 +12,28 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class RealTimeRemoteDataSource {
 
-
     suspend fun getDollarUpdates(): Flow<DollarModel> = callbackFlow {
         val callback = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                close(p0.toException())
+                close(p0.toException()) // Aquí cierras el flujo si hay error
             }
+
             override fun onDataChange(p0: DataSnapshot) {
-//                val value = p0.getValue(String::class.java)
                 val value = p0.getValue(DollarModel::class.java)
-                if (value != null) {
-                    trySend(value)
+                value?.let {
+                    trySend(it) // Enviar los datos si no es null
                 }
             }
         }
 
-
-//         Write a message to the database
         val database = Firebase.database
         val myRef = database.getReference("dollar")
         myRef.addValueEventListener(callback)
 
-
+        // Se asegura de remover el listener al cerrar el flujo
         awaitClose {
             myRef.removeEventListener(callback)
         }
     }
 }
+

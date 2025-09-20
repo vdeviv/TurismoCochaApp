@@ -17,41 +17,57 @@ import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.koin.androidx.viewmodel.dsl.viewModel
-class MainActivity : ComponentActivity() {
 
+
+
+import androidx.room.Room
+import com.example.turismoapp.feature.dollar.data.database.AppRoomDatabase
+import com.example.turismoapp.feature.dollar.data.database.dao.IDollarDao
+import com.example.turismoapp.feature.navigation.AppNavigation
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.logger.Level
+
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar Koin
+        // Configuración de Koin
         startKoin {
+            androidLogger(Level.ERROR)
             androidContext(this@MainActivity)
-            modules(appModule) // Asegúrate de que 'appModule' esté correctamente definido
+            modules(appModule)
         }
 
-        // Enable edge-to-edge display if needed
-        enableEdgeToEdge()
-
-        // Set the content view
         setContent {
             TurismoAppTheme {
-                AppNavigation() // Aquí se cargará tu pantalla de navegación
+                AppNavigation()
             }
         }
     }
-
-    // Define tu módulo de Koin aquí
-    private val appModule: Module = module {
-        // Registrar las fuentes de datos
-        single { DollarLocalDataSource(get()) }
-        single { RealTimeRemoteDataSource() }
-
-        // Registrar el repositorio, inyectando las dependencias necesarias
-        single<IDollarRepository> { DollarRepository(get(), get()) }
-
-        // Registrar FetchDollarUseCase
-        single { FetchDollarUseCase(get()) }
-
-        // Registrar el ViewModel
-        viewModel { DollarViewModel(fetchDollarUseCase = get()) }
-    }
 }
+
+val appModule = module {
+
+    // Definición de la base de datos de Room como un singleton
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppRoomDatabase::class.java,
+            "dollar_db"
+        ).build()
+    }
+
+    // Definición del DAO de Room como un singleton
+    single {
+        get<AppRoomDatabase>().dollarDao() as IDollarDao
+    }
+
+    // Registrar el repositorio
+    single<IDollarRepository> { DollarRepository(get(), get()) }
+
+    // Registrar FetchDollarUseCase
+    single { FetchDollarUseCase(get()) }
+
+    viewModel { DollarViewModel(get()) }
+}
+

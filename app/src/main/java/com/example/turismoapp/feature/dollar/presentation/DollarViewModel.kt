@@ -25,7 +25,7 @@ class DollarViewModel(
         class Success(val data: DollarModel) : DollarUIState()
     }
 
-    private val _uiState = MutableStateFlow<DollarUIState>(DollarUIState.Loading)
+     val _uiState = MutableStateFlow<DollarUIState>(DollarUIState.Loading)
     val uiState: StateFlow<DollarUIState> = _uiState
 
     init {
