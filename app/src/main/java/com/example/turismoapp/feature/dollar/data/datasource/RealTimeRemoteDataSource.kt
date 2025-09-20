@@ -1,4 +1,4 @@
-package com.example.turismoapp.feature.dollar.datasource
+package com.example.turismoapp.feature.dollar.data.datasource
 
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
 import kotlinx.coroutines.flow.Flow
@@ -20,14 +20,14 @@ class RealTimeRemoteDataSource {
 
             override fun onDataChange(p0: DataSnapshot) {
                 val value = p0.getValue(DollarModel::class.java)
-                value?.let {
-                    trySend(it) // Enviar los datos si no es null
+                if (value != null) {
+                    trySend(value)
                 }
             }
         }
 
         val database = Firebase.database
-        val myRef = database.getReference("dollar")
+        val myRef = database.getReference("CambioDolar")
         myRef.addValueEventListener(callback)
 
         // Se asegura de remover el listener al cerrar el flujo

@@ -1,7 +1,7 @@
 package com.example.turismoapp.feature.dollar.data.repository
 
-import com.example.turismoapp.feature.dollar.datasource.DollarLocalDataSource
-import com.example.turismoapp.feature.dollar.datasource.RealTimeRemoteDataSource
+import com.example.turismoapp.feature.dollar.data.datasource.DollarLocalDataSource
+import com.example.turismoapp.feature.dollar.data.datasource.RealTimeRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
 import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository

@@ -1,4 +1,4 @@
-package com.example.turismoapp.feature.dollar.datasource
+package com.example.turismoapp.feature.dollar.data.datasource
 
 import com.example.turismoapp.feature.dollar.data.database.dao.IDollarDao
 

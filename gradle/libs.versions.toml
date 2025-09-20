@@ -1,5 +1,5 @@
 [versions]
-agp = "8.12.3"
+agp = "8.12.0"
 coil = "3.3.0"
 kotlin = "2.0.20"
 coreKtx = "1.17.0"
@@ -19,6 +19,7 @@ lifecycleViewModelCompose = "2.5.1"
 composeNavigation = "2.9.3"
 foundationLayoutAndroid = "1.7.2"
 googleGmsGoogleServices = "4.4.3"
+
 firebaseDatabase = "22.0.0"
 firebaseMessaging = "25.0.1"
 
@@ -61,10 +62,6 @@ room-paging = { group="androidx.room", name="room-paging", version.ref="room"}
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 
-
-[bundles]
-local = ["room-runtime", "room-ktx", "room-rxjava2", "room-rxjava3", "room-guava", "room-paging" ]
-
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -72,4 +69,8 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref="ksp"}
+
+
+[bundles]
+local = ["room-runtime", "room-ktx", "room-rxjava2", "room-rxjava3", "room-guava", "room-paging" ]
 
