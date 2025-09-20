@@ -1,4 +1,5 @@
-package com.example.turismoapp.feature.dollar.data
+package com.example.turismoapp.feature.dollar
+
 
 import com.example.turismoapp.feature.dollar.data.database.entity.DollarEntity
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
