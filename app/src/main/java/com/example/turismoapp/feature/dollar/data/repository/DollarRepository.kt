@@ -6,16 +6,22 @@ import kotlinx.coroutines.flow.Flow
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
 import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository
 
+import kotlinx.coroutines.flow.onEach
+
+
 class DollarRepository(
     val realTimeRemoteDataSource: RealTimeRemoteDataSource,
     val localDataSource: DollarLocalDataSource
 ): IDollarRepository {
 
+
     override suspend fun getDollar(): Flow<DollarModel> {
-        realTimeRemoteDataSource.getDollarUpdates()
-            .collect { dollar ->
-                localDataSource.insert(dollar)
-            }
+//        return flow {
+//            emit(DollarModel("123", "456"))
+//        }
         return realTimeRemoteDataSource.getDollarUpdates()
+            .onEach {
+                localDataSource.insert(it)
+            }
     }
 }
