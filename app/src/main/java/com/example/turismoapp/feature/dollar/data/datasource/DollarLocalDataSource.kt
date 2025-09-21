@@ -2,8 +2,8 @@ package com.example.turismoapp.feature.dollar.data.datasource
 
 import com.example.turismoapp.feature.dollar.data.database.dao.IDollarDao
 
-import com.example.turismoapp.feature.dollar.toModel
-import com.example.turismoapp.feature.dollar.toEntity
+import com.example.turismoapp.feature.dollar.mapper.toModel
+import com.example.turismoapp.feature.dollar.mapper.toEntity
 
 import com.example.turismoapp.feature.dollar.domain.model.DollarModel
 
