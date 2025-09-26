@@ -21,4 +21,4 @@ data class DollarEntity(
 
 
     @ColumnInfo(name = "timestamp")
-    var timestamp: Long = 0)
+    var timestamp: Long = System.currentTimeMillis())
