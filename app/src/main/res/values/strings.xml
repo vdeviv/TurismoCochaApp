@@ -10,4 +10,11 @@
     <string name="gitalias_input">Ingresa la cuenta de GitHub</string>
     <string name="gitalias_btn_find">Buscar</string>
 
+    <string name="error_network" translatable="false">Unable to connect to the Internet. Please check your connection.</string>
+    <string name="error_server" translatable="false">A server error occurred. Please try again later.</string>
+    <string name="error_not_found" translatable="false">User not found.</string>
+    <string name="error_empty_response" translatable="false">No response received from the server.</string>
+    <string name="error_unknown" translatable="false">An unexpected error occurred. Please try again.</string>
+
+    <string name="api_key" translatable="false">fa3e844ce31744388e07fa47c7c5d8c3</string>
 </resources>
