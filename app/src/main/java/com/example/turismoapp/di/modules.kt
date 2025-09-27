@@ -8,7 +8,7 @@ import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository
 import com.example.turismoapp.feature.dollar.domain.usecase.FetchDollarUseCase
 import com.example.turismoapp.feature.dollar.presentation.DollarViewModel
 import okhttp3.OkHttpClient
-import org.koin.core.module.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 import java.util.concurrent.TimeUnit
