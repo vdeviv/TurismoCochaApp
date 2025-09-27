@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
-import com.example.turismoapp.feature.com.example.turismoapp.feature.profile.presentation.ProfileViewModel
+import com.example.turismoapp.feature.profile.presentation.ProfileViewModel
 import com.example.turismoapp.feature.navigation.Screen
 import org.koin.androidx.compose.koinViewModel
 

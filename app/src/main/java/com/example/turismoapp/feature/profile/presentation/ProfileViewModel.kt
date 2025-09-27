@@ -1,4 +1,4 @@
-package com.example.turismoapp.feature.com.example.turismoapp.feature.profile.presentation
+package com.example.turismoapp.feature.profile.presentation
 
 
 import androidx.lifecycle.ViewModel
