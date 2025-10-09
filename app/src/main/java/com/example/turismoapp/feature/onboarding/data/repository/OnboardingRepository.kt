@@ -1,17 +1,18 @@
-package com.example.turismoapp.features.onboarding.data.repository
+package com.example.turismoapp.feature.onboarding.data.repository
 
-import com.example.turismoapp.features.onboarding.data.datastore.OnboardingDataStore
-import com.example.turismoapp.features.onboarding.domain.repository.IOnboardingRepository
-import kotlinx.coroutines.flow.Flow
+import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
+import com.example.turismoapp.feature.onboarding.domain.repository.IOnboardingRepository
+import kotlinx.coroutines.flow.first
 
 class OnboardingRepository(
     private val dataStore: OnboardingDataStore
 ) : IOnboardingRepository {
 
-    override val isOnboardingCompleted: Flow<Boolean>
-        get() = dataStore.isOnboardingCompleted
+    override suspend fun isOnboardingCompleted(): Boolean {
+        return dataStore.isCompleted.first()
+    }
 
-    override suspend fun setOnboardingCompleted(completed: Boolean) {
-        dataStore.setOnboardingCompleted(completed)
+    override suspend fun saveOnboardingCompleted(completed: Boolean) {
+        dataStore.saveCompleted(completed)
     }
 }

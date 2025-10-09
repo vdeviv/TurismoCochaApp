@@ -8,22 +8,34 @@ import com.example.turismoapp.feature.dollar.data.datasource.RealTimeRemoteDataS
 import com.example.turismoapp.feature.dollar.domain.repository.IDollarRepository
 import com.example.turismoapp.feature.dollar.domain.usecase.FetchDollarUseCase
 import com.example.turismoapp.feature.dollar.presentation.DollarViewModel
+
 import com.example.turismoapp.feature.github.data.api.GithubService
 import com.example.turismoapp.feature.github.data.datasource.GithubRemoteDataSource
 import com.example.turismoapp.feature.github.data.repository.GithubRepository
 import com.example.turismoapp.feature.github.domain.repository.IGithubRepository
 import com.example.turismoapp.feature.github.domain.usecase.FindByNickNameUseCase
 import com.example.turismoapp.feature.github.presentation.GithubViewModel
+
 import com.example.turismoapp.feature.movie.data.api.MovieService
 import com.example.turismoapp.feature.movie.data.datasource.MovieRemoteDataSource
 import com.example.turismoapp.feature.movie.data.repository.MovieRepository
 import com.example.turismoapp.feature.movie.domain.repository.IMoviesRepository
 import com.example.turismoapp.feature.movie.domain.usecase.FetchPopularMoviesUseCase
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesViewModel
+
 import com.example.turismoapp.feature.profile.presentation.ProfileViewModel
 import com.example.turismoapp.feature.profile.data.repository.ProfileRepository
 import com.example.turismoapp.feature.profile.domain.repository.IProfileRepository
 import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
+
+// 🟢 ONBOARDING (Integrado en este mismo módulo)
+import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
+import com.example.turismoapp.feature.onboarding.data.repository.OnboardingRepository
+import com.example.turismoapp.feature.onboarding.domain.repository.IOnboardingRepository
+import com.example.turismoapp.feature.onboarding.domain.usecase.IsOnboardingCompletedUseCase
+import com.example.turismoapp.feature.onboarding.domain.usecase.SaveOnboardingCompletedUseCase
+import com.example.turismoapp.feature.onboarding.presentation.OnboardingViewModel
+
 import okhttp3.OkHttpClient
 import org.koin.android.BuildConfig
 import org.koin.android.ext.koin.androidApplication
@@ -44,7 +56,7 @@ object NetworkConstants {
 }
 
 val appModule = module {
-    // OkHttpClient
+
     single {
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -53,31 +65,31 @@ val appModule = module {
             .build()
     }
 
-    // Retrofit
-    single(named(com.example.turismoapp.di.NetworkConstants.RETROFIT_GITHUB)) {
+    // --- Retrofit: GitHub
+    single(named(NetworkConstants.RETROFIT_GITHUB)) {
         Retrofit.Builder()
-            .baseUrl(com.example.turismoapp.di.NetworkConstants.GITHUB_BASE_URL)
+            .baseUrl(NetworkConstants.GITHUB_BASE_URL)
             .client(get())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    // Retrofit
-    single(named(com.example.turismoapp.di.NetworkConstants.RETROFIT_MOVIE)) {
+    // --- Retrofit: Movies
+    single(named(NetworkConstants.RETROFIT_MOVIE)) {
         Retrofit.Builder()
-            .baseUrl(com.example.turismoapp.di.NetworkConstants.MOVIE_BASE_URL)
+            .baseUrl(NetworkConstants.MOVIE_BASE_URL)
             .client(get())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    // GithubService
+
     single<GithubService> {
-        get<Retrofit>( named(com.example.turismoapp.di.NetworkConstants.RETROFIT_GITHUB)).create(GithubService::class.java)
+        get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
+            .create(GithubService::class.java)
     }
-    single{ GithubRemoteDataSource(get()) }
-    single<IGithubRepository>{ GithubRepository(get()) }
-
+    single { GithubRemoteDataSource(get()) }
+    single<IGithubRepository> { GithubRepository(get()) }
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
@@ -91,7 +103,7 @@ val appModule = module {
     single { DollarLocalDataSource(get()) }
     single<IDollarRepository> { DollarRepository(get(), get()) }
     factory { FetchDollarUseCase(get()) }
-    viewModel{ DollarViewModel(get()) }
+    viewModel { DollarViewModel(get()) }
 
 
     single(named("apiKey")) {
@@ -99,12 +111,29 @@ val appModule = module {
     }
 
     single<MovieService> {
-        get<Retrofit>(named(com.example.turismoapp.di.NetworkConstants.RETROFIT_MOVIE)).create(MovieService::class.java)
+        get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE))
+            .create(MovieService::class.java)
     }
+
     single { MovieRemoteDataSource(get(), get(named("apiKey"))) }
     single<IMoviesRepository> { MovieRepository(get()) }
     factory { FetchPopularMoviesUseCase(get()) }
-    viewModel{ PopularMoviesViewModel(get()) }
+    viewModel { PopularMoviesViewModel(get()) }
 
+    single { OnboardingDataStore(get<android.content.Context>()) }
+
+    single<IOnboardingRepository> {
+        OnboardingRepository(get<OnboardingDataStore>())
+    }
+
+    factory { IsOnboardingCompletedUseCase(get<IOnboardingRepository>()) }
+
+    factory { SaveOnboardingCompletedUseCase(get<IOnboardingRepository>()) }
+
+    viewModel {
+        OnboardingViewModel(
+            get<IsOnboardingCompletedUseCase>(),
+            get<SaveOnboardingCompletedUseCase>()
+        )
+    }
 }
-

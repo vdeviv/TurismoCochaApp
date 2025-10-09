@@ -91,7 +91,9 @@ dependencies {
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
-
+    implementation(libs.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

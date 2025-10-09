@@ -1,8 +1,6 @@
-package com.example.turismoapp.features.onboarding.domain.repository
-
-import kotlinx.coroutines.flow.Flow
+package com.example.turismoapp.feature.onboarding.domain.repository
 
 interface IOnboardingRepository {
-    val isOnboardingCompleted: Flow<Boolean>
-    suspend fun setOnboardingCompleted(completed: Boolean)
+    suspend fun isOnboardingCompleted(): Boolean
+    suspend fun saveOnboardingCompleted(completed: Boolean)
 }

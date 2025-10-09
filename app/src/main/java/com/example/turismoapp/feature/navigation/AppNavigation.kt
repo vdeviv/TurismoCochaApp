@@ -10,6 +10,7 @@ import com.example.turismoapp.feature.dollar.presentation.DollarScreen
 import com.example.turismoapp.feature.login.presentation.CartScreen
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
+import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
 
 @Composable
 fun AppNavigation() {
@@ -17,34 +18,47 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.PopularMovies.route
-
+        startDestination = Screen.Onboarding.route
     ) {
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onSkip = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                },
+                onFinish = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onSuccess = {
-                    navController.navigate(Screen.Github.route) { // o Home/Profile
+                    navController.navigate(Screen.Github.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Home.route) {
-            // HomeScreen()
-        }
-        composable(Screen.Profile.route) {
-            // ProfileScreen()
-        }
+        composable(Screen.Home.route) { /* HomeScreen() */ }
+
+        composable(Screen.Profile.route) { /* ProfileScreen() */ }
 
         composable(Screen.Cart.route) {
             CartScreen()
         }
 
-            composable(Screen.Dollar.route) {
-                DollarScreen()
+        composable(Screen.Dollar.route) {
+            DollarScreen()
         }
 
-        composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
+        composable(Screen.PopularMovies.route) {
+            PopularMoviesScreen()
+        }
     }
 }

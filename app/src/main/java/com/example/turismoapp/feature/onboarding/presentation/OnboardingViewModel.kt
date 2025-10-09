@@ -1,10 +1,11 @@
-package com.example.turismoapp.features.onboarding.presentation
+package com.example.turismoapp.feature.onboarding.presentation
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.turismoapp.features.onboarding.domain.usecase.IsOnboardingCompletedUseCase
-import com.example.turismoapp.features.onboarding.domain.usecase.SaveOnboardingCompletedUseCase
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import com.example.turismoapp.feature.onboarding.domain.usecase.IsOnboardingCompletedUseCase
+import com.example.turismoapp.feature.onboarding.domain.usecase.SaveOnboardingCompletedUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class OnboardingViewModel(
@@ -12,12 +13,19 @@ class OnboardingViewModel(
     private val saveOnboardingCompletedUseCase: SaveOnboardingCompletedUseCase
 ) : ViewModel() {
 
-    val isOnboardingCompleted = isOnboardingCompletedUseCase()
-        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+    private val _isOnboardingCompleted = MutableStateFlow(false)
+    val isOnboardingCompleted: StateFlow<Boolean> = _isOnboardingCompleted
+
+    init {
+        viewModelScope.launch {
+            _isOnboardingCompleted.value = isOnboardingCompletedUseCase()
+        }
+    }
 
     fun completeOnboarding() {
         viewModelScope.launch {
-            saveOnboardingCompletedUseCase(true)
+            saveOnboardingCompletedUseCase(completed = true)
+            _isOnboardingCompleted.value = true
         }
     }
 }

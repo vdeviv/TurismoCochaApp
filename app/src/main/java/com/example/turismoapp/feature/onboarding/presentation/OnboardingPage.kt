@@ -1,53 +1,48 @@
-package com.example.turismoapp.features.onboarding.presentation
+package com.example.turismoapp.feature.onboarding.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+
+data class OnboardingPageModel(
+    val imageRes: Int,
+    val title: String,
+    val description: String
+)
 
 @Composable
-fun OnboardingPage(
-    imageRes: Int,
-    title: String,
-    description: String,
-    buttonText: String,
-    onButtonClick: () -> Unit
+fun OnboardingPageItem(
+    page: OnboardingPageModel,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = imageRes),
-            contentDescription = title,
+            painter = painterResource(id = page.imageRes),
+            contentDescription = page.title,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
+                .padding(16.dp)
+                .height(260.dp)
                 .fillMaxWidth()
-                .height(300.dp)
-                .padding(8.dp),
-            contentScale = ContentScale.Crop
+                .clip(RoundedCornerShape(24.dp))
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(description, style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = onButtonClick,
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth(0.6f)
-        ) {
-            Text(buttonText, fontSize = 16.sp)
-        }
+        Spacer(Modifier.height(12.dp))
+        Text(page.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+        Text(page.description, style = MaterialTheme.typography.bodyMedium)
     }
 }
