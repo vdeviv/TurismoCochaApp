@@ -3,7 +3,6 @@ package com.example.turismoapp.feature.onboarding.presentation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +13,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.turismoapp.ui.theme.GrayText
+import com.example.turismoapp.ui.theme.TextBlack
 
 data class OnboardingPageModel(
     val imageRes: Int,
@@ -22,27 +24,41 @@ data class OnboardingPageModel(
 )
 
 @Composable
-fun OnboardingPageItem(
-    page: OnboardingPageModel,
-    modifier: Modifier = Modifier
-) {
+fun OnboardingPageItem(page: OnboardingPageModel) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = page.title,
-            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .padding(16.dp)
-                .height(260.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
+                .height(380.dp)
+                .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)),
+            contentScale = ContentScale.Crop
         )
-        Spacer(Modifier.height(12.dp))
-        Text(page.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(8.dp))
-        Text(page.description, style = MaterialTheme.typography.bodyMedium)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = page.title,
+            color = TextBlack,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = page.description,
+            color = GrayText,
+            fontSize = 15.sp,
+            lineHeight = 20.sp,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
     }
 }
