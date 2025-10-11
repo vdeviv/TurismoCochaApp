@@ -7,13 +7,13 @@ import androidx.activity.enableEdgeToEdge
 import com.example.turismoapp.feature.navigation.AppNavigation
 import com.example.turismoapp.ui.theme.TurismoAppTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TurismoAppTheme {
+
+            TurismoAppTheme(darkTheme = false, dynamicColor = false) {
                 AppNavigation()
             }
         }

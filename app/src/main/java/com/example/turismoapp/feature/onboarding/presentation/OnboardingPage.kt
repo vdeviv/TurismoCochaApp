@@ -27,19 +27,20 @@ data class OnboardingPageModel(
 fun OnboardingPageItem(page: OnboardingPageModel) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = page.title,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp)
+                .fillMaxHeight(0.55f)
                 .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)),
             contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Text(
             text = page.title,
@@ -49,14 +50,14 @@ fun OnboardingPageItem(page: OnboardingPageModel) {
             modifier = Modifier.padding(horizontal = 24.dp)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Text(
             text = page.description,
             color = GrayText,
             fontSize = 15.sp,
             lineHeight = 20.sp,
-            modifier = Modifier.padding(horizontal = 24.dp)
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
 }
