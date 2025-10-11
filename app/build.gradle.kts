@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("br.com.devsrsouza.compose.icons:font-awesome:1.1.0")
 
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.firebase.database)

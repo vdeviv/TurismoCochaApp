@@ -16,6 +16,8 @@ import com.example.turismoapp.ui.theme.GreenMayu
 import com.example.turismoapp.ui.theme.RedMayu
 import com.example.turismoapp.ui.theme.YellowMayu
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -47,80 +49,68 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .navigationBarsPadding()
-            .systemBarsPadding()
+            .systemBarsPadding() // para evitar recortes en pantallas edge
     ) {
-        Column(
+        HorizontalPager(
+            count = pages.size,
+            state = pagerState,
             modifier = Modifier.fillMaxSize()
-        ) {
-            // “Saltar” en texto plano (no botón)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = "Saltar",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable { onSkip() }
-                )
-            }
-
-            // Páginas
-            HorizontalPager(
-                count = pages.size,
-                state = pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                OnboardingPageItem(page = pages[page])
-            }
-
-            // Indicadores
-            HorizontalPagerIndicator(
-                pagerState = pagerState,
-                activeColor = MaterialTheme.colorScheme.primary,
-                inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(vertical = 20.dp)
-            )
-
-            // Botón inferior
-            Button(
-                onClick = {
-                    scope.launch {
-                        if (pagerState.currentPage < pages.lastIndex) {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        } else {
-                            onFinish()
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when (pagerState.currentPage) {
-                        0 -> RedMayu
-                        1 -> YellowMayu
-                        else -> GreenMayu
-                    },
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(horizontal = 24.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    text = if (pagerState.currentPage == pages.lastIndex) "Empezar" else "Siguiente",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+        ) { page ->
+            OnboardingPageItem(page = pages[page])
         }
+
+        // Indicadores
+        HorizontalPagerIndicator(
+            pagerState = pagerState,
+            activeColor = MaterialTheme.colorScheme.primary,
+            inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 100.dp)
+        )
+
+        // Botón inferior
+        Button(
+            onClick = {
+                scope.launch {
+                    if (pagerState.currentPage < pages.lastIndex) {
+                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    } else {
+                        onFinish()
+                    }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = when (pagerState.currentPage) {
+                    0 -> RedMayu
+                    1 -> YellowMayu
+                    else -> GreenMayu
+                },
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(0.9f)
+                .height(60.dp)
+                .padding(bottom = 30.dp)
+        ) {
+            Text(
+                text = if (pagerState.currentPage == pages.lastIndex) "Empezar" else "Siguiente",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Text(
+            text = "Saltar",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 32.dp, end = 24.dp)
+                .clickable { onSkip() }
+        )
     }
 }

@@ -26,9 +26,7 @@ data class OnboardingPageModel(
 @Composable
 fun OnboardingPageItem(page: OnboardingPageModel) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -36,8 +34,8 @@ fun OnboardingPageItem(page: OnboardingPageModel) {
             contentDescription = page.title,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(380.dp)
-                .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)),
+                .height(500.dp)
+                .clip(RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)),
             contentScale = ContentScale.Crop
         )
 
@@ -48,7 +46,7 @@ fun OnboardingPageItem(page: OnboardingPageModel) {
             color = TextBlack,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 24.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -58,7 +56,7 @@ fun OnboardingPageItem(page: OnboardingPageModel) {
             color = GrayText,
             fontSize = 15.sp,
             lineHeight = 20.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 24.dp)
         )
     }
 }
