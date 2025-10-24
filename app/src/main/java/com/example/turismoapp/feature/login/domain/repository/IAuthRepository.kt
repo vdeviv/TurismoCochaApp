@@ -4,4 +4,5 @@ import com.example.turismoapp.feature.login.domain.model.AuthUser
 
 interface IAuthRepository {
     suspend fun signIn(email: String, password: String): Result<AuthUser>
+    suspend fun signUp(email: String, password: String): Result<AuthUser>
 }

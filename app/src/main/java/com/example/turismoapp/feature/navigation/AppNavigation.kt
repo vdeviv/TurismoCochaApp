@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
+import com.example.turismoapp.feature.login.presentation.RegisterScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
 
 @Composable
@@ -20,7 +21,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = { BottomBar(navController) }   // ← barra inferior
+        bottomBar = { BottomBar(navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -34,7 +35,24 @@ fun AppNavigation() {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
-                    }
+                    },
+                    onRegisterClick = { navController.navigate(Screen.Register.route) } // <-- NAVEGA A REGISTER
+                )
+            }
+
+            // Register → al éxito navega al Home
+            composable(Screen.Register.route) { // <-- NUEVA RUTA DE REGISTRO
+                RegisterScreen(
+                    onSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Register.route) { inclusive = true }
+                        }
+                    },
+                    onLoginClick = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    } // <-- NAVEGA A LOGIN
                 )
             }
 
