@@ -1,6 +1,10 @@
 package com.example.turismoapp.feature.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -15,35 +19,43 @@ import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Login.route // 👈 Esto es un String ("login")
-    ) {
-        // --------- Pantalla Login ----------
-        composable(route = Screen.Login.route) {
-            LoginScreen(
-                onSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+    Scaffold(
+        bottomBar = { BottomBar(navController) }   // ← barra inferior
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Login.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            // Login → al éxito navega al Home
+            composable(Screen.Login.route) {
+                LoginScreen(
+                    onSuccess = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        // --------- Pantalla Home ----------
-        composable(route = Screen.Home.route) {
-            val vm: HomeViewModel = viewModel()
-            val state = vm.ui.collectAsStateWithLifecycle()
+            // Home con ViewModel
+            composable(Screen.Home.route) {
+                val vm: HomeViewModel = viewModel()
+                val state = vm.ui.collectAsStateWithLifecycle()
+                HomeScreen(
+                    state = state.value,
+                    onRetry = { vm.load() }
+                )
+            }
 
-            HomeScreen(
-                state = state.value,
-                onRetry = { vm.load() }
-            )
-        }
+            // Rutas de la barra
+            composable(Screen.Calendar.route) { Text("Calendario") }
+            composable(Screen.Search.route)   { Text("Buscar / Explorar") }
+            composable(Screen.Packages.route) { Text("Paquetes turísticos") }
+            composable(Screen.Profile.route)  { Text("Perfil") }
 
-        // --------- Pantalla de Películas ----------
-        composable(route = Screen.PopularMovies.route) {
-            PopularMoviesScreen()
+            // Extra
+            composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
         }
     }
 }
