@@ -38,7 +38,7 @@ fun AppNavigation() {
         composable(Screen.Login.route) {
             LoginScreen(
                 onSuccess = {
-                    navController.navigate(Screen.Github.route) {
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
@@ -60,5 +60,10 @@ fun AppNavigation() {
         composable(Screen.PopularMovies.route) {
             PopularMoviesScreen()
         }
+
+        composable(Screen.Home.route) {
+            com.example.turismoapp.feature.home.HomeRoute()
+        }
+
     }
 }

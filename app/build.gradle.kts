@@ -29,81 +29,91 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
 }
 
 dependencies {
 
+    // --- CORE ANDROIDX ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // --- MATERIAL ICONS / FONTAWESOME ---
     implementation("androidx.compose.material:material-icons-extended")
     implementation("br.com.devsrsouza.compose.icons:font-awesome:1.1.0")
 
+    // --- LAYOUT / FOUNDATION ---
     implementation(libs.androidx.foundation.layout.android)
+
+    // --- FIREBASE ---
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    // --- RETROFIT (HTTP CLIENT) ---
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0") // ✅ usamos GSON
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // --- COIL (IMÁGENES EN COMPOSE) ---
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    //implementation(libs.coil)
+    // --- LIFECYCLE / VIEWMODEL COMPOSE ---
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
 
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-
-    //implementation(libs.glide)
+    // --- NAVIGATION COMPOSE ---
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.compose.navigation)
 
+    // --- KOIN (INYECCIÓN DE DEPENDENCIAS) ---
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.navigation)
     implementation(libs.koin.androidx.compose)
 
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network)
-    implementation(libs.androidx.navigation.compose)
-
-    //local bundle room
+    // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
+    // --- ACCOMPANIST (PAGINAS Y SCROLL) ---
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pager.indicators)
+
+    // --- DATASTORE (PREFERENCIAS) ---
     implementation(libs.androidx.datastore.preferences)
+
+    // --- TESTS ---
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    testImplementation(libs.mockk)
-
 }
-
