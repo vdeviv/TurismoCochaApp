@@ -30,12 +30,17 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     fun load() {
         _ui.value = HomeUiState.Loading
         viewModelScope.launch {
-            val places = repo.popularInCochabamba()
-            if (places.isEmpty()) {
-                _ui.value = HomeUiState.Error("Sin resultados por ahora")
-            } else {
-                _ui.value = HomeUiState.Success(places)
+            try {
+                val places = repo.popularInCochabamba()
+                if (places.isEmpty()) {
+                    _ui.value = HomeUiState.Error("Sin resultados por ahora")
+                } else {
+                    _ui.value = HomeUiState.Success(places)
+                }
+            } catch (e: Exception) {
+                _ui.value = HomeUiState.Error("Error al conectar con la API")
             }
         }
     }
+
 }

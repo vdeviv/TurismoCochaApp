@@ -1,16 +1,15 @@
 package com.example.turismoapp.feature.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.turismoapp.feature.dollar.presentation.DollarScreen
-import com.example.turismoapp.feature.login.presentation.CartScreen
+import com.example.turismoapp.feature.home.HomeScreen
+import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
-import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
 
 @Composable
 fun AppNavigation() {
@@ -18,24 +17,10 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Onboarding.route
+        startDestination = Screen.Login.route // 👈 Esto es un String ("login")
     ) {
-        composable(Screen.Onboarding.route) {
-            OnboardingScreen(
-                onSkip = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
-                },
-                onFinish = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.Login.route) {
+        // --------- Pantalla Login ----------
+        composable(route = Screen.Login.route) {
             LoginScreen(
                 onSuccess = {
                     navController.navigate(Screen.Home.route) {
@@ -45,25 +30,20 @@ fun AppNavigation() {
             )
         }
 
-        composable(Screen.Home.route) { /* HomeScreen() */ }
+        // --------- Pantalla Home ----------
+        composable(route = Screen.Home.route) {
+            val vm: HomeViewModel = viewModel()
+            val state = vm.ui.collectAsStateWithLifecycle()
 
-        composable(Screen.Profile.route) { /* ProfileScreen() */ }
-
-        composable(Screen.Cart.route) {
-            CartScreen()
+            HomeScreen(
+                state = state.value,
+                onRetry = { vm.load() }
+            )
         }
 
-        composable(Screen.Dollar.route) {
-            DollarScreen()
-        }
-
-        composable(Screen.PopularMovies.route) {
+        // --------- Pantalla de Películas ----------
+        composable(route = Screen.PopularMovies.route) {
             PopularMoviesScreen()
         }
-
-        composable(Screen.Home.route) {
-            com.example.turismoapp.feature.home.HomeRoute()
-        }
-
     }
 }
