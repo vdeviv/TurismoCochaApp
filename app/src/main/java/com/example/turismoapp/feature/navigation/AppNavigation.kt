@@ -2,33 +2,65 @@ package com.example.turismoapp.feature.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.login.presentation.RegisterScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
+import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
+import com.example.turismoapp.feature.splash.presentation.SplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val noBottomRoutes = setOf(
+        Screen.Splash.route, Screen.Onboarding.route,
+        Screen.Login.route, Screen.Register.route
+    )
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
 
     Scaffold(
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { if (showBottomBar) BottomBar(navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Login.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Login → al éxito navega al Home
+            composable(Screen.Splash.route) {
+                SplashScreen(
+                    onNavigateNext = {
+                        navController.navigate(Screen.Onboarding.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onSkip = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    },
+                    onFinish = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -36,12 +68,11 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onRegisterClick = { navController.navigate(Screen.Register.route) } // <-- NAVEGA A REGISTER
+                    onRegisterClick = { navController.navigate(Screen.Register.route) }
                 )
             }
 
-            // Register → al éxito navega al Home
-            composable(Screen.Register.route) { // <-- NUEVA RUTA DE REGISTRO
+            composable(Screen.Register.route) {
                 RegisterScreen(
                     onSuccess = {
                         navController.navigate(Screen.Home.route) {
@@ -52,27 +83,20 @@ fun AppNavigation() {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
-                    } // <-- NAVEGA A LOGIN
+                    }
                 )
             }
 
-            // Home con ViewModel
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
-                HomeScreen(
-                    state = state.value,
-                    onRetry = { vm.load() }
-                )
+                HomeScreen(state = state.value, onRetry = { vm.load() })
             }
 
-            // Rutas de la barra
-            composable(Screen.Calendar.route) { Text("Calendario") }
-            composable(Screen.Search.route)   { Text("Buscar / Explorar") }
-            composable(Screen.Packages.route) { Text("Paquetes turísticos") }
-            composable(Screen.Profile.route)  { Text("Perfil") }
-
-            // Extra
+            composable(Screen.Calendar.route) { /* … */ }
+            composable(Screen.Search.route)   { /* … */ }
+            composable(Screen.Packages.route) { /* … */ }
+            composable(Screen.Profile.route)  { /* … */ }
             composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
         }
     }
