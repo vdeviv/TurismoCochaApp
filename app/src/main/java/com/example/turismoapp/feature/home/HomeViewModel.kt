@@ -65,7 +65,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.8,
-            image = "https://images.unsplash.com/photo-1583224964723-aca5ff12fc50?w=800&q=80"
+            image = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg"
         ),
         PlaceDto(
             id = "plaza_14_septiembre",
@@ -74,7 +74,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.6,
-            image = "https://images.unsplash.com/photo-1555109307-f7d9da25c244?w=800&q=80"
+            image = "https://www.ceramicacoboce.com/wp-content/uploads/2024/01/plaza14sep.png"
         ),
         PlaceDto(
             id = "centro_simon_patino",
@@ -83,7 +83,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.7,
-            image = "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80"
+            image = "https://dondebolivia.com/wp-content/uploads/cache/images/SIMON-I-PAT%C3%91O/SIMON-I-PAT%C3%91O-3167904255.jpg"
         ),
         PlaceDto(
             id = "convento_santa_teresa",
@@ -92,7 +92,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.5,
-            image = "https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=800&q=80"
+            image = "https://www.opinion.com.bo/media/opinion/images/2018/04/08/2018S13943.jpg"
         ),
         PlaceDto(
             id = "parque_familia",
@@ -101,7 +101,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.4,
-            image = "https://images.unsplash.com/photo-1571019613576-2b22c76fd955?w=800&q=80"
+            image = "https://www.civitatis.com/f/bolivia/cochabamba/galeria/fuente-parque-familia.jpg"
         ),
         PlaceDto(
             id = "laguna_alalay",
@@ -110,7 +110,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.5,
-            image = "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=800&q=80"
+            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2023/03/12/2023031220545699714.jpg"
         ),
         PlaceDto(
             id = "palacio_portales",
@@ -119,7 +119,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.6,
-            image = "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&q=80"
+            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg"
         ),
         PlaceDto(
             id = "parque_tunari",
@@ -128,7 +128,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.9,
-            image = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+            image = "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0a/95/b9/ee/photo2jpg.jpg?w=900&h=500&s=1"
         )
     )
 }
