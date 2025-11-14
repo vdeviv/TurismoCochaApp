@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.gms.google.services) // Correcto: Aplica el plugin de Firebase
     alias(libs.plugins.ksp)
 }
 
@@ -68,21 +68,24 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
-    // ⭐️ Agregado: BOM de Firebase para gestionar todas las versiones de Firebase.
+    // ✅ BOM de Firebase - Gestiona todas las versiones automáticamente
     implementation(platform(libs.firebase.bom))
 
+    // ✅ Firebase Database (sin especificar versión, la maneja el BOM)
     implementation(libs.firebase.database)
+
+    // ✅ Firebase Messaging (sin especificar versión, la maneja el BOM)
     implementation(libs.firebase.messaging)
 
-    // ⭐️ Agregado: Firebase Authentication (Auth)
-    implementation(libs.firebase.auth.ktx)
+    // ✅ Firebase Authentication (sin especificar versión, la maneja el BOM)
+    implementation(libs.firebase.auth)
 
-    // ⭐️ Agregado: Coroutines para poder usar .await() en las tareas de Firebase
+    // ✅ Coroutines para Firebase (para usar .await())
     implementation(libs.kotlinx.coroutines.play.services)
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0") // ✅ usamos GSON
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // --- COIL (IMÁGENES EN COMPOSE) ---
@@ -105,8 +108,6 @@ dependencies {
 
     // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
-    // Nota: 'annotationProcessor' ya no se usa con KSP. Mantienes la línea de 'ksp' que es la correcta.
-    // annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
@@ -116,7 +117,6 @@ dependencies {
 
     // --- DATASTORE (PREFERENCIAS) ---
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.firebase.ktx)
 
     // --- TESTS ---
     testImplementation(libs.junit)
@@ -127,5 +127,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }

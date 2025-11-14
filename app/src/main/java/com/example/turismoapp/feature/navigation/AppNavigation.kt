@@ -2,6 +2,7 @@ package com.example.turismoapp.feature.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -71,22 +72,20 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
+                    // LoginScreen redirige al registro
                     onRegisterClick = { navController.navigate(Screen.Register.route) }
                 )
             }
 
             composable(Screen.Register.route) {
                 RegisterScreen(
-                    onSuccess = {
+                    // CORRECCIÓN: Usar onRegistrationSuccess según la firma de RegisterScreen
+                    onRegistrationSuccess = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }
-                    },
-                    onLoginClick = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
                     }
+                    // NOTA: No existe onLoginClick en RegisterScreen
                 )
             }
 
@@ -122,7 +121,11 @@ fun AppNavigation() {
                     onLanguage    = { navController.navigate(Screen.Language.route) }
                 )
             }
-
+            // Agrega aquí los composables para Favorites, Trips, Settings y Language si no existen
+            composable(Screen.Favorites.route) { Text("Favoritos") }
+            composable(Screen.Trips.route) { Text("Mis Viajes") }
+            composable(Screen.Settings.route) { Text("Configuración") }
+            composable(Screen.Language.route) { Text("Idioma") }
 
 
         }
