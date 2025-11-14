@@ -70,6 +70,10 @@ dependencies {
     // --- FIREBASE ---
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
+    implementation ("com.google.maps.android:maps-compose:2.11.4")
+    implementation ("com.google.android.gms:play-services-maps:18.1.0")
+
+
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

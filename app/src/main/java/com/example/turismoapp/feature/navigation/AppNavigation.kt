@@ -24,6 +24,7 @@ import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.profile.presentation.ProfileScreen
 import com.example.turismoapp.feature.profile.presentation.EditProfileScreen
+import com.example.turismoapp.feature.search.presentation.SearchViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +32,14 @@ import com.example.turismoapp.feature.profile.presentation.EditProfileScreen
 fun AppNavigation() {
 
     val navController = rememberNavController()
+
+    // -----------------------------
+    // GLOBAL SEARCH VIEWMODEL
+    // -----------------------------
+    val searchVM: SearchViewModel = viewModel()
+    val allPlaces by searchVM.allPlaces.collectAsState()
+
+    // ESTADOS DEL MODAL
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
@@ -38,6 +47,14 @@ fun AppNavigation() {
         skipPartiallyExpanded = true
     )
 
+    // FILTRO REAL
+    val filteredPlaces = allPlaces.filter {
+        it.name.contains(searchText, ignoreCase = true) ||
+                it.description.contains(searchText, ignoreCase = true) ||
+                it.city.contains(searchText, ignoreCase = true)
+    }
+
+    // RUTAS donde no se muestra la BottomBar
     val noBottomRoutes = setOf(
         Screen.Splash.route, Screen.Onboarding.route,
         Screen.Login.route, Screen.Register.route
@@ -95,9 +112,7 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onRegisterClick = {
-                        navController.navigate(Screen.Register.route)
-                    }
+                    onRegisterClick = { navController.navigate(Screen.Register.route) }
                 )
             }
 
@@ -121,7 +136,6 @@ fun AppNavigation() {
             }
 
             composable(Screen.Calendar.route) { /* TODO */ }
-            composable(Screen.Search.route)   { /* TODO */ }
             composable(Screen.Packages.route) { /* TODO */ }
 
             composable(Screen.PopularMovies.route) {
@@ -131,21 +145,11 @@ fun AppNavigation() {
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onBack = { navController.popBackStack() },
-                    onEditProfile = {
-                        navController.navigate(Screen.EditProfile.route)
-                    },
-                    onFavorites   = {
-                        navController.navigate(Screen.Favorites.route)
-                    },
-                    onTrips       = {
-                        navController.navigate(Screen.Trips.route)
-                    },
-                    onSettings    = {
-                        navController.navigate(Screen.Settings.route)
-                    },
-                    onLanguage    = {
-                        navController.navigate(Screen.Language.route)
-                    }
+                    onEditProfile = { navController.navigate(Screen.EditProfile.route) },
+                    onFavorites   = { },
+                    onTrips       = { },
+                    onSettings    = { },
+                    onLanguage    = { }
                 )
             }
 
@@ -179,9 +183,30 @@ fun AppNavigation() {
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
-                    placeholder = { Text("Ej: Cristo de la Concordia") },
+                    placeholder = { Text("Ej: Palacio Portales") },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // RESULTADOS REALES DEL SEARCH VIEWMODEL
+                filteredPlaces.forEach { place ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = place.name,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Text(
+                            text = place.city,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Divider()
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
