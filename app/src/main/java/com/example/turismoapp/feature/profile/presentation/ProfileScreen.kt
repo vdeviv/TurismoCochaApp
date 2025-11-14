@@ -1,5 +1,6 @@
 package com.example.turismoapp.feature.profile.presentation
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,16 +27,19 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
     onBack: () -> Unit = {},
     onEditProfile: () -> Unit = {},
+
     onFavorites: () -> Unit = {},
     onTrips: () -> Unit = {},
     onSettings: () -> Unit = {},
-    onLanguage: () -> Unit = {}
+    onLanguage: () -> Unit = {},
+
 ) {
     val state = profileViewModel.state.collectAsState()
 
