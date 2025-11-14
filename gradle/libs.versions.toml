@@ -30,6 +30,11 @@ googleGmsGoogleServices = "4.4.3"
 
 firebaseDatabase = "22.0.0"
 firebaseMessaging = "25.0.1"
+firebaseBom = "33.1.0" # <-- Nueva versión de Firebase BoM
+firebaseAuth = "23.0.0" # <-- Versión de Auth
+kotlinxCoroutinesPlayServices = "1.8.1" # <-- Para usar .await() en corrutinas
+
+
 accompanist = "0.28.0"
 datastore = "1.1.1"
 
@@ -66,6 +71,11 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 
 # DataStore Preferences
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+firebase-ktx = { group = "com.google.firebase", name = "firebase-ktx" }
+
 
 # Accompanist Pager
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }

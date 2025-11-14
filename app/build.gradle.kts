@@ -68,8 +68,17 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
+    // ⭐️ Agregado: BOM de Firebase para gestionar todas las versiones de Firebase.
+    implementation(platform(libs.firebase.bom))
+
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
+
+    // ⭐️ Agregado: Firebase Authentication (Auth)
+    implementation(libs.firebase.auth.ktx)
+
+    // ⭐️ Agregado: Coroutines para poder usar .await() en las tareas de Firebase
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -96,7 +105,8 @@ dependencies {
 
     // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
-    annotationProcessor(libs.room.compiler)
+    // Nota: 'annotationProcessor' ya no se usa con KSP. Mantienes la línea de 'ksp' que es la correcta.
+    // annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
@@ -106,6 +116,7 @@ dependencies {
 
     // --- DATASTORE (PREFERENCIAS) ---
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.firebase.ktx)
 
     // --- TESTS ---
     testImplementation(libs.junit)
