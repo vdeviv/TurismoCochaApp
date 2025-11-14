@@ -1,15 +1,33 @@
+# Android Studio
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+
+# Ignore all .idea except code styles (optional)
+/.idea/*
+!/idea/codeStyles
+
+# If you prefer to ignore everything:
+/.idea/
+
+# Mac OS
 .DS_Store
+
+# Build outputs
 /build
 /captures
 .externalNativeBuild
 .cxx
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Keystore files (important)
+*.jks
+*.keystore
+
+# Misc
 local.properties
