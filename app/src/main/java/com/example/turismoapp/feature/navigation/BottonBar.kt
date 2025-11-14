@@ -1,6 +1,5 @@
 package com.example.turismoapp.feature.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -13,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -29,7 +27,10 @@ data class BottomNavItem(
 )
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(
+    navController: NavController,
+    onSearchClick: () -> Unit
+) {
     val items = listOf(
         BottomNavItem("Inicio", Screen.Home.route, Icons.Filled.Home),
         BottomNavItem("Calendario", Screen.Calendar.route, Icons.Filled.DateRange),
@@ -49,7 +50,7 @@ fun BottomBar(navController: NavController) {
             val isSearch = item.label == "Buscar"
 
             if (isSearch) {
-                // Botón circular elevado para "Buscar"
+                // FAB central para BUSCAR
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -58,14 +59,7 @@ fun BottomBar(navController: NavController) {
                     contentAlignment = Alignment.TopCenter
                 ) {
                     FloatingActionButton(
-                        onClick = {
-                            if (currentRoute != item.route) {
-                                navController.navigate(item.route) {
-                                    popUpTo(Screen.Home.route)
-                                    launchSingleTop = true
-                                }
-                            }
-                        },
+                        onClick = { onSearchClick() }, // ← YA NO NAVEGA
                         containerColor = PurpleMayu,
                         shape = CircleShape,
                         elevation = FloatingActionButtonDefaults.elevation(6.dp)
@@ -90,7 +84,6 @@ fun BottomBar(navController: NavController) {
                     },
                     icon = { Icon(item.icon, contentDescription = item.label) },
                     label = { Text(item.label) },
-                    alwaysShowLabel = true,
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = PurpleMayu,
                         selectedTextColor = PurpleMayu,
