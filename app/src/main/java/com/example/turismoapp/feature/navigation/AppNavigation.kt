@@ -19,6 +19,7 @@ import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.turismoapp.feature.profile.presentation.ProfileScreen
+import com.example.turismoapp.feature.profile.presentation.EditProfileScreen
 
 
 @Composable
@@ -101,9 +102,28 @@ fun AppNavigation() {
             composable(Screen.Profile.route)  { /* … */ }
             composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
 
-            composable(Screen.Profile.route) {
-                ProfileScreen()
+
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onSave = { name, email, phone, summary ->
+                        // Aquí luego puedes guardar en Room o API
+                        navController.popBackStack()
+                    }
+                )
             }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditProfile = { navController.navigate(Screen.EditProfile.route) },
+                    onFavorites   = { navController.navigate(Screen.Favorites.route) },
+                    onTrips       = { navController.navigate(Screen.Trips.route) },
+                    onSettings    = { navController.navigate(Screen.Settings.route) },
+                    onLanguage    = { navController.navigate(Screen.Language.route) }
+                )
+            }
+
+
 
         }
     }
