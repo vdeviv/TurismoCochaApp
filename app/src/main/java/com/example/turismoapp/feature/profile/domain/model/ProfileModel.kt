@@ -7,10 +7,10 @@ import com.example.turismoapp.feature.profile.domain.vo.SummaryText
 import com.example.turismoapp.feature.profile.domain.vo.UrlPath
 
 
-data class ProfileModel (
-    val pathUrl: String,
-    val name: String,
-    val email: String,
-    val cellphone: String,
-    val summary: String
+data class ProfileModel(
+    val pathUrl: String = "",
+    val name: String = "",
+    val email: String = "",
+    val cellphone: String = "",
+    val summary: String = ""
 )

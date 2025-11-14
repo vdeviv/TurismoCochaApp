@@ -18,6 +18,8 @@ import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.turismoapp.feature.profile.presentation.ProfileScreen
+
 
 @Composable
 fun AppNavigation() {
@@ -98,6 +100,11 @@ fun AppNavigation() {
             composable(Screen.Packages.route) { /* … */ }
             composable(Screen.Profile.route)  { /* … */ }
             composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
+
+            composable(Screen.Profile.route) {
+                ProfileScreen()
+            }
+
         }
     }
 }
