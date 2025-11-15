@@ -12,8 +12,6 @@ data class PlaceDto(
     val department: String = "",
     val image: String = "",
     val rating: Double = 0.0,
-
-    // NUEVO:
     val latitude: Double = -17.392,
     val longitude: Double = -66.159
 )

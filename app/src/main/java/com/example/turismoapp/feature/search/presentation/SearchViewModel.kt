@@ -40,7 +40,6 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // REUTILIZO LOS MISMOS LUGARES QUE TIENES EN HomeViewModel
     private fun getLocalPlaces() = listOf(
         PlaceDto(
             id = "cristo_concordia",
