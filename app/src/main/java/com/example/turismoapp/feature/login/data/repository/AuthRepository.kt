@@ -16,7 +16,6 @@ class AuthRepository(
 ) : IAuthRepository {
 
     override val currentUser: Flow<AuthUser?> = flow {
-        // En una app real usarías onAuthStateChangedListener
         emit(firebaseAuth.currentUser?.let {
             AuthUser(it.uid, it.email)
         })
@@ -29,9 +28,9 @@ class AuthRepository(
 
             if (firebaseUser != null) {
                 val authUser = AuthUser(firebaseUser.uid, firebaseUser.email)
-                Result.Success(authUser) // Usando tu Result.Success
+                Result.Success(authUser)
             } else {
-                Result.Error(Exception("Registro fallido. El usuario es nulo.")) // Usando tu Result.Error
+                Result.Error(Exception("Registro fallido. El usuario es nulo."))
             }
         } catch (e: Exception) {
             val errorMessage = when (e) {
@@ -40,7 +39,7 @@ class AuthRepository(
                 is FirebaseAuthUserCollisionException -> "Ya existe una cuenta con este email."
                 else -> e.localizedMessage ?: "Error desconocido al registrar."
             }
-            Result.Error(Exception(errorMessage)) // Usando tu Result.Error
+            Result.Error(Exception(errorMessage))
         }
     }
 
@@ -54,7 +53,11 @@ class AuthRepository(
                 Result.Error(Exception("Error al iniciar sesión."))
             }
         } catch (e: Exception) {
-            Result.Error(Exception(e.localizedMessage ?: "Error al iniciar sesión."))
+            val errorMessage = when (e) {
+                is FirebaseAuthInvalidCredentialsException -> "Email o contraseña incorrectos."
+                else -> e.localizedMessage ?: "Error al iniciar sesión."
+            }
+            Result.Error(Exception(errorMessage))
         }
     }
 }

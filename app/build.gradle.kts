@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.gms.google.services) // Correcto: Aplica el plugin de Firebase
+    alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.ksp)
 }
 
@@ -68,20 +68,14 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
-    // ✅ BOM de Firebase - Gestiona todas las versiones automáticamente
     implementation(platform(libs.firebase.bom))
-
-    // ✅ Firebase Database (sin especificar versión, la maneja el BOM)
     implementation(libs.firebase.database)
-
-    // ✅ Firebase Messaging (sin especificar versión, la maneja el BOM)
     implementation(libs.firebase.messaging)
-
-    // ✅ Firebase Authentication (sin especificar versión, la maneja el BOM)
     implementation(libs.firebase.auth)
-
-    // ✅ Coroutines para Firebase (para usar .await())
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // --- GOOGLE SIGN-IN ---
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
