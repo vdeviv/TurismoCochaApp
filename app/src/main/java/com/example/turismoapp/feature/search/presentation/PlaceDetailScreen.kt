@@ -41,7 +41,6 @@ fun PlaceDetailScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // Imagen principal
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -73,7 +72,7 @@ fun PlaceDetailScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("⭐ ${place.rating}", style = MaterialTheme.typography.bodyLarge)
+            Text(" ${place.rating}", style = MaterialTheme.typography.bodyLarge)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -88,7 +87,7 @@ fun PlaceDetailScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // GOOGLE MAPS OK
+            // GOOGLE MAPS
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,7 +112,7 @@ fun PlaceDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = { /* Abrir Maps real más adelante */ }) {
+                Button(onClick = {  }) {
                     Text("Ver en Google Maps")
                 }
 
