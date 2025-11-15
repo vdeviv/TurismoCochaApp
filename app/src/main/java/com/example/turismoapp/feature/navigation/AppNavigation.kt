@@ -9,11 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
@@ -26,7 +26,7 @@ import com.example.turismoapp.feature.profile.presentation.ProfileScreen
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.search.presentation.SearchViewModel
 import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
-
+import com.example.turismoapp.feature.navigation.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
@@ -38,9 +38,7 @@ fun AppNavigation() {
     var isSearchOpen by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val filteredPlaces = allPlaces.filter {
         it.name.contains(searchText, ignoreCase = true) ||
@@ -48,9 +46,12 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
+    // Rutas donde NO debe aparecer el BottomBar
     val noBottomRoutes = setOf(
-        Screen.Splash.route, Screen.Onboarding.route,
-        Screen.Login.route, Screen.Register.route
+        Screen.Splash.route,
+        Screen.Onboarding.route,
+        Screen.Login.route,
+        Screen.Register.route
     )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -73,6 +74,7 @@ fun AppNavigation() {
             modifier = Modifier.padding(innerPadding)
         ) {
 
+            // --- SPLASH ---
             composable(Screen.Splash.route) {
                 SplashScreen(onNavigateNext = {
                     navController.navigate(Screen.Onboarding.route) {
@@ -81,6 +83,7 @@ fun AppNavigation() {
                 })
             }
 
+            // --- ONBOARDING ---
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onSkip = {
@@ -96,6 +99,7 @@ fun AppNavigation() {
                 )
             }
 
+            // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -109,41 +113,51 @@ fun AppNavigation() {
                 )
             }
 
+            // --- REGISTER ---
             composable(Screen.Register.route) {
                 RegisterScreen(
-                    onSuccess = {
+                    onRegistrationSuccess = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }
                     },
-                    onLoginClick = {
+                    onBackToLogin = {
                         navController.navigate(Screen.Login.route)
                     }
                 )
             }
 
+            // --- HOME ---
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
                 HomeScreen(state = state.value, onRetry = { vm.load() })
             }
 
-            composable(Screen.Calendar.route) { /* TODO */ }
-            composable(Screen.Packages.route) { /* TODO */ }
+            // --- CALENDAR ---
+            composable(Screen.Calendar.route) { Text("Calendario") }
 
-            composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
+            // --- PACKAGES ---
+            composable(Screen.Packages.route) { Text("Paquetes") }
 
+            // --- MOVIES ---
+            composable(Screen.PopularMovies.route) {
+                PopularMoviesScreen()
+            }
+
+            // --- PROFILE ---
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onBack = { navController.popBackStack() },
                     onEditProfile = { navController.navigate(Screen.EditProfile.route) },
-                    onFavorites = {},
-                    onTrips = {},
-                    onSettings = {},
-                    onLanguage = {}
+                    onFavorites = { navController.navigate(Screen.Favorites.route) },
+                    onTrips = { navController.navigate(Screen.Trips.route) },
+                    onSettings = { navController.navigate(Screen.Settings.route) },
+                    onLanguage = { navController.navigate(Screen.Language.route) }
                 )
             }
 
+            // --- EDIT PROFILE ---
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onBack = { navController.popBackStack() },
@@ -151,12 +165,16 @@ fun AppNavigation() {
                 )
             }
 
-            // ROUTE DE DETALLE
+            // --- EXTRAS ---
+            composable(Screen.Favorites.route) { Text("Favoritos") }
+            composable(Screen.Trips.route) { Text("Mis Viajes") }
+            composable(Screen.Settings.route) { Text("Configuración") }
+            composable(Screen.Language.route) { Text("Idioma") }
+
+            // --- DETALLE DE LUGAR ---
             composable(
                 route = Screen.DetailPlace.route,
-                arguments = listOf(navArgument("placeId") {
-                    type = NavType.StringType
-                })
+                arguments = listOf(navArgument("placeId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val placeId = backStackEntry.arguments?.getString("placeId") ?: ""
                 val place = allPlaces.find { it.id == placeId }
@@ -171,6 +189,7 @@ fun AppNavigation() {
         }
     }
 
+    // --- SEARCH BOTTOM SHEET ---
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },

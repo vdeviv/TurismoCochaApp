@@ -1,14 +1,13 @@
 {
   "project_info": {
-    "project_number": "104742534277",
-    "firebase_url": "https://turismoapp-13034182-default-rtdb.firebaseio.com",
-    "project_id": "turismoapp-13034182",
-    "storage_bucket": "turismoapp-13034182.firebasestorage.app"
+    "project_number": "520083069036",
+    "project_id": "turismocochaapp",
+    "storage_bucket": "turismocochaapp.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:104742534277:android:7d36ab7817bdcf9cbc7dec",
+        "mobilesdk_app_id": "1:520083069036:android:e0803e4f369d271587a049",
         "android_client_info": {
           "package_name": "com.example.turismoapp"
         }
@@ -16,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAgVsCv-05UnWqD31-S7b_NGyIAiu0cK74"
+          "current_key": "AIzaSyAsdTm1FxV4Q61_6Xi2HwznMk4q8W79xrk"
         }
       ],
       "services": {

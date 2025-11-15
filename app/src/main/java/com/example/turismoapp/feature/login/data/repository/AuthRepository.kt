@@ -1,62 +1,63 @@
-// feature/login/data/repository/AuthRepository.kt
-
 package com.example.turismoapp.feature.login.data.repository
 
 import com.example.turismoapp.feature.login.domain.model.AuthUser
+import com.example.turismoapp.feature.login.domain.model.Result
 import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
-import kotlinx.coroutines.delay
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.tasks.await
 
-// ⭐️ SOLUCIÓN: Usamos un objeto singleton en memoria para simular una 'Base de Datos'.
-// Esto asegura que la lista de usuarios sea la misma en todas las instancias de AuthRepository.
-private object InMemoryStore {
-    // Almacena a los usuarios iniciales (AuthUser) y sus contraseñas (String).
-    val users: MutableList<Pair<AuthUser, String>> = mutableListOf(
-        AuthUser(id = "1", email = "demo@cocha.com", displayName = "Demo User") to "123456",
-        AuthUser(id = "2", email = "vivi@cocha.com", displayName = "Vivi") to "123456"
-    )
-}
+class AuthRepository(
+    private val firebaseAuth: FirebaseAuth
+) : IAuthRepository {
 
-class AuthRepository : IAuthRepository {
-    override suspend fun signIn(email: String, password: String): Result<AuthUser> {
-        delay(700)
-
-        // 1. Buscar al usuario en la lista compartida
-        val userEntry = InMemoryStore.users.find {
-            it.first.email.equals(email, true) && it.second == password
-        }
-
-        return if (userEntry != null) {
-            // Éxito: se encontró el par email/contraseña
-            Result.success(userEntry.first)
-        } else {
-            // Falla: credenciales no encontradas o incorrectas
-            Result.failure(IllegalArgumentException("Credenciales inválidas"))
-        }
+    override val currentUser: Flow<AuthUser?> = flow {
+        emit(firebaseAuth.currentUser?.let {
+            AuthUser(it.uid, it.email)
+        })
     }
 
     override suspend fun signUp(email: String, password: String): Result<AuthUser> {
-        delay(1000)
+        return try {
+            val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+            val firebaseUser = authResult.user
 
-        // 1. Comprobar si el correo ya existe
-        val existingEmail = InMemoryStore.users.any { it.first.email.equals(email, true) }
-        if (existingEmail) {
-            return Result.failure(IllegalStateException("El correo ya está en uso"))
+            if (firebaseUser != null) {
+                val authUser = AuthUser(firebaseUser.uid, firebaseUser.email)
+                Result.Success(authUser)
+            } else {
+                Result.Error(Exception("Registro fallido. El usuario es nulo."))
+            }
+        } catch (e: Exception) {
+            val errorMessage = when (e) {
+                is FirebaseAuthWeakPasswordException -> "La contraseña es demasiado débil."
+                is FirebaseAuthInvalidCredentialsException -> "Email o contraseña inválidos."
+                is FirebaseAuthUserCollisionException -> "Ya existe una cuenta con este email."
+                else -> e.localizedMessage ?: "Error desconocido al registrar."
+            }
+            Result.Error(Exception(errorMessage))
         }
+    }
 
-        // 2. Crear y construir el nuevo AuthUser
-        val newUserId = (InMemoryStore.users.size + 1).toString()
-        val defaultDisplayName = email.substringBefore('@')
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-
-        val newUser = AuthUser(
-            id = newUserId,
-            email = email.trim(),
-            displayName = defaultDisplayName
-        )
-
-        // 3. ⭐️ GUARDAR AL NUEVO USUARIO Y SU CONTRASEÑA EN LA MEMORIA COMPARTIDA ⭐️
-        InMemoryStore.users.add(newUser to password)
-
-        return Result.success(newUser)
+    override suspend fun signIn(email: String, password: String): Result<AuthUser> {
+        return try {
+            firebaseAuth.signInWithEmailAndPassword(email, password).await()
+            val firebaseUser = firebaseAuth.currentUser
+            if (firebaseUser != null) {
+                Result.Success(AuthUser(firebaseUser.uid, firebaseUser.email))
+            } else {
+                Result.Error(Exception("Error al iniciar sesión."))
+            }
+        } catch (e: Exception) {
+            val errorMessage = when (e) {
+                is FirebaseAuthInvalidCredentialsException -> "Email o contraseña incorrectos."
+                else -> e.localizedMessage ?: "Error al iniciar sesión."
+            }
+            Result.Error(Exception(errorMessage))
+        }
     }
 }

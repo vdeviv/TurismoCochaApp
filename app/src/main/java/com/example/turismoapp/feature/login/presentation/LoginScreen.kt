@@ -25,14 +25,63 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.turismoapp.ui.theme.PurpleMayu
-import com.example.turismoapp.ui.theme.GrayText
+
+// *** Importaciones corregidas ***
+import com.example.turismoapp.feature.login.data.repository.AuthRepository
+import com.example.turismoapp.feature.login.domain.usecase.SignInUseCase
+import com.example.turismoapp.feature.login.domain.usecase.SignUpUseCase
+import com.example.turismoapp.feature.login.domain.usecase.ValidateEmailUseCase
+import com.example.turismoapp.feature.login.domain.usecase.ValidatePasswordUseCase
+import com.google.firebase.auth.FirebaseAuth
+// ******************************
+
+
+// Definición simple de colores (asumiendo que las tienes definidas en ui.theme)
+val PurpleMayu = Color(0xFF673AB7) // Ejemplo
+val GrayText = Color(0xFF888888) // Ejemplo
+
+
+// Clase de inyección manual simple para el ViewModel (reemplazar con Hilt/Koin en producción)
+class LoginViewModelFactory(
+    private val signInUseCase: SignInUseCase,
+    private val signUpUseCase: SignUpUseCase,
+    private val validateEmailUseCase: ValidateEmailUseCase,
+    private val validatePasswordUseCase: ValidatePasswordUseCase
+) : androidx.lifecycle.ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
+            return LoginViewModel(
+                signInUseCase = signInUseCase,
+                signUpUseCase = signUpUseCase,
+                validateEmailUseCase = validateEmailUseCase,
+                validatePasswordUseCase = validatePasswordUseCase
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+// Configuración de la inyección de dependencias para el ejemplo
+@Composable
+fun getLoginViewModel(): LoginViewModel {
+    val firebaseAuth = FirebaseAuth.getInstance()
+    val authRepository = AuthRepository(firebaseAuth)
+    val validateEmailUseCase = ValidateEmailUseCase()
+    val validatePasswordUseCase = ValidatePasswordUseCase()
+    val signInUseCase = SignInUseCase(authRepository)
+    val signUpUseCase = SignUpUseCase(authRepository, validateEmailUseCase, validatePasswordUseCase) // Usamos SignUpUseCase aquí
+
+    val factory = LoginViewModelFactory(signInUseCase, signUpUseCase, validateEmailUseCase, validatePasswordUseCase)
+    return viewModel(factory = factory)
+}
+
 
 @Composable
 fun LoginScreen(
     onSuccess: () -> Unit,
     onRegisterClick: () -> Unit = {},
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel = getLoginViewModel() // Usar la función de inyección
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -41,20 +90,21 @@ fun LoginScreen(
     val state by viewModel.loginState.collectAsState()
     val context = LocalContext.current
 
+    // Efecto para manejar navegación y errores
     LaunchedEffect(state) {
         when (val s = state) {
-            is LoginViewModel.LoginState.Successful -> {
+            is LoginState.Successful -> {
                 onSuccess()
                 viewModel.reset()
             }
-            is LoginViewModel.LoginState.Error ->
+            is LoginState.Error ->
                 Toast.makeText(context, s.message, Toast.LENGTH_LONG).show()
-            LoginViewModel.LoginState.Init,
-            LoginViewModel.LoginState.Loading -> Unit
+            LoginState.Init,
+            LoginState.Loading -> Unit
         }
     }
 
-    val isLoading = state is LoginViewModel.LoginState.Loading
+    val isLoading = state is LoginState.Loading
 
     // Fondo blanco puro
     Surface(
@@ -131,7 +181,7 @@ fun LoginScreen(
 
             // Botón de inicio de sesión
             Button(
-                onClick = { viewModel.doLogin(email, password) },
+                onClick = { viewModel.doLogin(email, password) }, // <<-- LLamada correcta al ViewModel
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = PurpleMayu),
                 shape = RoundedCornerShape(16.dp),

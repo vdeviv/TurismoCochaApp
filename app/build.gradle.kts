@@ -68,8 +68,14 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // --- GOOGLE SIGN-IN ---
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation ("com.google.maps.android:maps-compose:2.11.4")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
 
@@ -77,7 +83,7 @@ dependencies {
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0") // ✅ usamos GSON
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // --- COIL (IMÁGENES EN COMPOSE) ---
@@ -100,7 +106,6 @@ dependencies {
 
     // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
-    annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
