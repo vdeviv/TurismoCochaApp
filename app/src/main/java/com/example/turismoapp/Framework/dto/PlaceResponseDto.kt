@@ -11,5 +11,7 @@ data class PlaceDto(
     val city: String = "",
     val department: String = "",
     val image: String = "",
-    val rating: Double = 4.7
+    val rating: Double = 0.0,
+    val latitude: Double = -17.392,
+    val longitude: Double = -66.159
 )

@@ -1,56 +1,89 @@
 package com.example.turismoapp.feature.navigation
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import androidx.navigation.navArgument
+
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.login.presentation.RegisterScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
 import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
-import com.example.turismoapp.feature.splash.presentation.SplashScreen
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.turismoapp.feature.profile.presentation.ProfileScreen
 import com.example.turismoapp.feature.profile.presentation.EditProfileScreen
-
-
+import com.example.turismoapp.feature.profile.presentation.ProfileScreen
+import com.example.turismoapp.feature.splash.presentation.SplashScreen
+import com.example.turismoapp.feature.search.presentation.SearchViewModel
+import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
+import com.example.turismoapp.feature.navigation.Screen
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
+
     val navController = rememberNavController()
+    val searchVM: SearchViewModel = viewModel()
+    val allPlaces by searchVM.allPlaces.collectAsState()
+
+    var isSearchOpen by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val filteredPlaces = allPlaces.filter {
+        it.name.contains(searchText, ignoreCase = true) ||
+                it.description.contains(searchText, ignoreCase = true) ||
+                it.city.contains(searchText, ignoreCase = true)
+    }
+
+    // Rutas donde NO debe aparecer el BottomBar
     val noBottomRoutes = setOf(
-        Screen.Splash.route, Screen.Onboarding.route,
-        Screen.Login.route, Screen.Register.route
+        Screen.Splash.route,
+        Screen.Onboarding.route,
+        Screen.Login.route,
+        Screen.Register.route
     )
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
 
     Scaffold(
-        bottomBar = { if (showBottomBar) BottomBar(navController) }
+        bottomBar = {
+            if (showBottomBar) {
+                BottomBar(
+                    navController = navController,
+                    onSearchClick = { isSearchOpen = true }
+                )
+            }
+        }
     ) { innerPadding ->
+
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+
+            // --- SPLASH ---
             composable(Screen.Splash.route) {
-                SplashScreen(
-                    onNavigateNext = {
-                        navController.navigate(Screen.Onboarding.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
-                        }
+                SplashScreen(onNavigateNext = {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
                     }
-                )
+                })
             }
 
+            // --- ONBOARDING ---
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onSkip = {
@@ -65,6 +98,8 @@ fun AppNavigation() {
                     }
                 )
             }
+
+            // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -72,62 +107,138 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    // LoginScreen redirige al registro
-                    onRegisterClick = { navController.navigate(Screen.Register.route) }
+                    onRegisterClick = {
+                        navController.navigate(Screen.Register.route)
+                    }
                 )
             }
 
+            // --- REGISTER ---
             composable(Screen.Register.route) {
                 RegisterScreen(
-                    // CORRECCIÓN: Usar onRegistrationSuccess según la firma de RegisterScreen
                     onRegistrationSuccess = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }
+                    },
+                    onBackToLogin = {
+                        navController.navigate(Screen.Login.route)
                     }
-                    // NOTA: No existe onLoginClick en RegisterScreen
                 )
             }
 
+            // --- HOME ---
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
                 HomeScreen(state = state.value, onRetry = { vm.load() })
             }
 
-            composable(Screen.Calendar.route) { /* … */ }
-            composable(Screen.Search.route)   { /* … */ }
-            composable(Screen.Packages.route) { /* … */ }
-            composable(Screen.Profile.route)  { /* … */ }
-            composable(Screen.PopularMovies.route) { PopularMoviesScreen() }
+            // --- CALENDAR ---
+            composable(Screen.Calendar.route) { Text("Calendario") }
 
+            // --- PACKAGES ---
+            composable(Screen.Packages.route) { Text("Paquetes") }
 
-            composable(Screen.EditProfile.route) {
-                EditProfileScreen(
-                    onBack = { navController.popBackStack() },
-                    onSave = { name, email, phone, summary ->
-                        // Aquí luego puedes guardar en Room o API
-                        navController.popBackStack()
-                    }
-                )
+            // --- MOVIES ---
+            composable(Screen.PopularMovies.route) {
+                PopularMoviesScreen()
             }
+
+            // --- PROFILE ---
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onBack = { navController.popBackStack() },
                     onEditProfile = { navController.navigate(Screen.EditProfile.route) },
-                    onFavorites   = { navController.navigate(Screen.Favorites.route) },
-                    onTrips       = { navController.navigate(Screen.Trips.route) },
-                    onSettings    = { navController.navigate(Screen.Settings.route) },
-                    onLanguage    = { navController.navigate(Screen.Language.route) }
+                    onFavorites = { navController.navigate(Screen.Favorites.route) },
+                    onTrips = { navController.navigate(Screen.Trips.route) },
+                    onSettings = { navController.navigate(Screen.Settings.route) },
+                    onLanguage = { navController.navigate(Screen.Language.route) }
                 )
             }
-            // Agrega aquí los composables para Favorites, Trips, Settings y Language si no existen
+
+            // --- EDIT PROFILE ---
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onSave = { _, _, _, _ -> navController.popBackStack() }
+                )
+            }
+
+            // --- EXTRAS ---
             composable(Screen.Favorites.route) { Text("Favoritos") }
             composable(Screen.Trips.route) { Text("Mis Viajes") }
             composable(Screen.Settings.route) { Text("Configuración") }
             composable(Screen.Language.route) { Text("Idioma") }
 
+            // --- DETALLE DE LUGAR ---
+            composable(
+                route = Screen.DetailPlace.route,
+                arguments = listOf(navArgument("placeId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val placeId = backStackEntry.arguments?.getString("placeId") ?: ""
+                val place = allPlaces.find { it.id == placeId }
 
+                if (place != null) {
+                    PlaceDetailScreen(
+                        place = place,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
+        }
+    }
+
+    // --- SEARCH BOTTOM SHEET ---
+    if (isSearchOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { isSearchOpen = false },
+            sheetState = sheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+
+                Text("Buscar destinos", style = MaterialTheme.typography.titleMedium)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    placeholder = { Text("Ej: Palacio Portales") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                filteredPlaces.forEach { place ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp)
+                            .clickable {
+                                isSearchOpen = false
+                                navController.navigate(Screen.DetailPlace.create(place.id))
+                            }
+                    ) {
+                        Text(place.name, style = MaterialTheme.typography.titleSmall)
+                        Text(place.city, style = MaterialTheme.typography.bodySmall)
+                        Divider()
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = { isSearchOpen = false },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Cerrar")
+                }
+            }
         }
     }
 }

@@ -1,21 +1,24 @@
 package com.example.turismoapp.feature.navigation
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardTravel
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.turismoapp.ui.theme.PurpleMayu
+import com.example.turismoapp.ui.theme.GrayText
+import com.example.turismoapp.ui.theme.WhiteBackground
 
 data class BottomNavItem(
     val label: String,
@@ -24,7 +27,10 @@ data class BottomNavItem(
 )
 
 @Composable
-fun BottomBar(navController: NavController) {
+fun BottomBar(
+    navController: NavController,
+    onSearchClick: () -> Unit
+) {
     val items = listOf(
         BottomNavItem("Inicio", Screen.Home.route, Icons.Filled.Home),
         BottomNavItem("Calendario", Screen.Calendar.route, Icons.Filled.DateRange),
@@ -36,31 +42,57 @@ fun BottomBar(navController: NavController) {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 6.dp
+        containerColor = WhiteBackground,
+        tonalElevation = 12.dp
     ) {
         items.forEach { item ->
-            NavigationBarItem(
-                selected = currentRoute == item.route,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            popUpTo(Screen.Home.route)
-                            launchSingleTop = true
-                        }
+            val isSelected = currentRoute == item.route
+            val isSearch = item.label == "Buscar"
+
+            if (isSearch) {
+                // FAB central para BUSCAR
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp)
+                        .height(60.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    FloatingActionButton(
+                        onClick = { onSearchClick() }, // ← YA NO NAVEGA
+                        containerColor = PurpleMayu,
+                        shape = CircleShape,
+                        elevation = FloatingActionButtonDefaults.elevation(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            tint = Color.White
+                        )
                     }
-                },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                alwaysShowLabel = true,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF7B1FA2),
-                    selectedTextColor = Color(0xFF7B1FA2),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    indicatorColor = Color.Transparent
+                }
+            } else {
+                NavigationBarItem(
+                    selected = isSelected,
+                    onClick = {
+                        if (currentRoute != item.route) {
+                            navController.navigate(item.route) {
+                                popUpTo(Screen.Home.route)
+                                launchSingleTop = true
+                            }
+                        }
+                    },
+                    icon = { Icon(item.icon, contentDescription = item.label) },
+                    label = { Text(item.label) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = PurpleMayu,
+                        selectedTextColor = PurpleMayu,
+                        unselectedIconColor = GrayText,
+                        unselectedTextColor = GrayText,
+                        indicatorColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     }
 }
