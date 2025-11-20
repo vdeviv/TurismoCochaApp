@@ -11,13 +11,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,50 +40,62 @@ import com.example.turismoapp.R
 @Composable
 fun HomeScreen(
     state: HomeUiState,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onProfileClick: () -> Unit,
+    onNotificationClick: () -> Unit,
+    onPlaceClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp)
     ) {
-        // ---------- Header con perfil y botón ----------
+
+        // ------------ HEADER ------------
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(top = 24.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onProfileClick() }
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Foto de perfil",
+                    contentDescription = "Perfil",
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
                 )
-                Spacer(Modifier.width(10.dp))
+                Spacer(Modifier.width(12.dp))
                 Text(
                     text = "Jairo Montaño",
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
                 )
             }
 
-            IconButton(onClick = { /* acción compartir */ }) {
+            IconButton(onClick = { onNotificationClick() }) {
                 Icon(
-                    imageVector = Icons.Default.Share,
-                    contentDescription = "Compartir",
-                    tint = MaterialTheme.colorScheme.primary
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notificaciones",
+                    tint = Color.Black,
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
 
-        // ---------- Título principal ----------
+        // ---------- Título ----------
         Text(
             text = "Explora la hermosa",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         )
         Text(
             text = "Cochabamba!",
@@ -88,13 +108,11 @@ fun HomeScreen(
             color = Color(0xFFD32F2F),
             thickness = 3.dp,
             modifier = Modifier
-                .width(150.dp)
-                .padding(vertical = 4.dp)
+                .width(160.dp)
+                .padding(top = 6.dp, bottom = 24.dp)
         )
 
-        Spacer(Modifier.height(16.dp))
-
-        // ---------- Sección de mejores destinos ----------
+        // ---------- Mejores destinos ----------
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -104,50 +122,37 @@ fun HomeScreen(
                 "Los mejores destinos",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
             )
-            TextButton(onClick = { /* Ver más */ }) {
-                Text("Ver más", color = MaterialTheme.colorScheme.primary)
-            }
+            Text(
+                "Ver más",
+                color = Color(0xFF7A1CAC),
+                modifier = Modifier.clickable { },
+            )
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
 
-        // ---------- Cuerpo según estado ----------
         when (state) {
-            is HomeUiState.Loading -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator(color = Color(0xFFD32F2F))
-                        Spacer(Modifier.height(8.dp))
-                        Text("Cargando destinos...")
-                    }
-                }
-            }
+            is HomeUiState.Loading -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) { CircularProgressIndicator() }
 
-            is HomeUiState.Error -> {
-                Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = state.message,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Button(onClick = onRetry) {
-                            Text("Reintentar")
-                        }
-                    }
-                }
+            is HomeUiState.Error -> Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(state.message, color = Color.Red)
+                Button(onClick = onRetry) { Text("Reintentar") }
             }
 
             is HomeUiState.Success -> {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                     items(state.places) { place ->
-                        DestinationCard(place)
+                        DestinationCard(
+                            place = place,
+                            onClick = { onPlaceClick(place.id) }
+                        )
                     }
                 }
             }
@@ -155,99 +160,96 @@ fun HomeScreen(
     }
 }
 
-// ---------- Tarjeta de destino individual (mejorada) ----------
+
+// ===========================================================
+//  CARD estilo Figma — versión final y corregida
+// ===========================================================
 @Composable
-fun DestinationCard(place: PlaceDto) {
+fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
     var isBookmarked by remember { mutableStateOf(false) }
 
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier
-            .width(260.dp)
-            .height(320.dp)
-            .clickable { /* navegar a detalles */ },
-        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            .width(280.dp)     // ancho exacto según Figma
+            .height(380.dp)    // alto ideal para pantallas reales
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
         Box {
             Column {
-                // Imagen
+
+                // Imagen grande, como Figma
                 AsyncImage(
-                    model = place.image.ifEmpty { "https://picsum.photos/600/400?random=${place.id}" },
+                    model = place.image,
                     contentDescription = place.name,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+                        .height(230.dp),
                     contentScale = ContentScale.Crop
                 )
 
-                // Información
-                Column(Modifier.padding(12.dp)) {
+                Column(Modifier.padding(16.dp)) {
                     Text(
-                        text = place.name,
+                        place.name,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(4.dp))
+
+                    Spacer(Modifier.height(6.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_mylocation),
                             contentDescription = null,
                             tint = Color.Gray,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = place.city,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray
-                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(place.city, color = Color.Gray)
                     }
 
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(12.dp))
 
-                    // Rating chip
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFFFF3E0),
-                        modifier = Modifier.wrapContentWidth()
+                        color = Color(0xFFFFF3E0)
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "⭐", fontSize = 12.sp)
-                            Spacer(Modifier.width(4.dp))
+                            Text("⭐", fontSize = 14.sp)
+                            Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "%.1f".format(place.rating),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFFF6F00)
-                                )
+                                "%.1f".format(place.rating),
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF6F00)
                             )
                         }
                     }
                 }
             }
 
-            // Botón de bookmark flotante
+            // Bookmark button
             IconButton(
                 onClick = { isBookmarked = !isBookmarked },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(32.dp)
+                    .padding(12.dp)
+                    .size(36.dp)
                     .background(Color.White.copy(alpha = 0.9f), CircleShape)
             ) {
                 Icon(
-                    imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                    contentDescription = "Guardar",
-                    tint = if (isBookmarked) Color(0xFFD32F2F) else Color.Gray,
-                    modifier = Modifier.size(18.dp)
+                    imageVector = if (isBookmarked)
+                        Icons.Default.Bookmark
+                    else
+                        Icons.Default.BookmarkBorder,
+                    contentDescription = "Bookmark",
+                    tint = if (isBookmarked) Color(0xFFD32F2F) else Color.Gray
                 )
             }
         }
