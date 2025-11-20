@@ -26,22 +26,21 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-// *** Importaciones corregidas ***
+// Importa colores oficiales Mayu
+import com.example.turismoapp.ui.theme.PurpleMayu
+import com.example.turismoapp.ui.theme.GrayText
+import com.example.turismoapp.ui.theme.TextBlack
+import com.example.turismoapp.ui.theme.WhiteBackground
+
+// Importaciones ViewModel
 import com.example.turismoapp.feature.login.data.repository.AuthRepository
 import com.example.turismoapp.feature.login.domain.usecase.SignInUseCase
 import com.example.turismoapp.feature.login.domain.usecase.SignUpUseCase
 import com.example.turismoapp.feature.login.domain.usecase.ValidateEmailUseCase
 import com.example.turismoapp.feature.login.domain.usecase.ValidatePasswordUseCase
 import com.google.firebase.auth.FirebaseAuth
-// ******************************
 
 
-// Definición simple de colores (asumiendo que las tienes definidas en ui.theme)
-val PurpleMayu = Color(0xFF673AB7) // Ejemplo
-val GrayText = Color(0xFF888888) // Ejemplo
-
-
-// Clase de inyección manual simple para el ViewModel (reemplazar con Hilt/Koin en producción)
 class LoginViewModelFactory(
     private val signInUseCase: SignInUseCase,
     private val signUpUseCase: SignUpUseCase,
@@ -62,7 +61,6 @@ class LoginViewModelFactory(
     }
 }
 
-// Configuración de la inyección de dependencias para el ejemplo
 @Composable
 fun getLoginViewModel(): LoginViewModel {
     val firebaseAuth = FirebaseAuth.getInstance()
@@ -70,7 +68,7 @@ fun getLoginViewModel(): LoginViewModel {
     val validateEmailUseCase = ValidateEmailUseCase()
     val validatePasswordUseCase = ValidatePasswordUseCase()
     val signInUseCase = SignInUseCase(authRepository)
-    val signUpUseCase = SignUpUseCase(authRepository, validateEmailUseCase, validatePasswordUseCase) // Usamos SignUpUseCase aquí
+    val signUpUseCase = SignUpUseCase(authRepository, validateEmailUseCase, validatePasswordUseCase)
 
     val factory = LoginViewModelFactory(signInUseCase, signUpUseCase, validateEmailUseCase, validatePasswordUseCase)
     return viewModel(factory = factory)
@@ -81,7 +79,7 @@ fun getLoginViewModel(): LoginViewModel {
 fun LoginScreen(
     onSuccess: () -> Unit,
     onRegisterClick: () -> Unit = {},
-    viewModel: LoginViewModel = getLoginViewModel() // Usar la función de inyección
+    viewModel: LoginViewModel = getLoginViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -90,7 +88,6 @@ fun LoginScreen(
     val state by viewModel.loginState.collectAsState()
     val context = LocalContext.current
 
-    // Efecto para manejar navegación y errores
     LaunchedEffect(state) {
         when (val s = state) {
             is LoginState.Successful -> {
@@ -106,10 +103,9 @@ fun LoginScreen(
 
     val isLoading = state is LoginState.Loading
 
-    // Fondo blanco puro
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = WhiteBackground
     ) {
         Column(
             modifier = Modifier
@@ -118,13 +114,12 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Título
+
             Text(
                 text = "Bienvenido de nuevo",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 4.dp)
+                color = TextBlack
             )
 
             Text(
@@ -135,7 +130,6 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Campo email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -148,7 +142,6 @@ fun LoginScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // Campo contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -156,9 +149,11 @@ fun LoginScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 trailingIcon = {
-                    val icon = if (showPass) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
                     IconButton(onClick = { showPass = !showPass }) {
-                        Icon(imageVector = icon, contentDescription = null)
+                        Icon(
+                            imageVector = if (showPass) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = null
+                        )
                     }
                 },
                 visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
@@ -166,7 +161,6 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Enlace “Olvidaste tu contraseña”
             Text(
                 text = "¿Olvidaste tu contraseña?",
                 color = PurpleMayu,
@@ -174,14 +168,12 @@ fun LoginScreen(
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(top = 8.dp)
-                    .clickable { /* Acción futura */ }
             )
 
             Spacer(Modifier.height(24.dp))
 
-            // Botón de inicio de sesión
             Button(
-                onClick = { viewModel.doLogin(email, password) }, // <<-- LLamada correcta al ViewModel
+                onClick = { viewModel.doLogin(email, password) },
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = PurpleMayu),
                 shape = RoundedCornerShape(16.dp),
@@ -191,62 +183,39 @@ fun LoginScreen(
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(22.dp)
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Entrando…", color = MaterialTheme.colorScheme.onPrimary)
+                    Text("Entrando…", color = Color.White)
                 } else {
-                    Text("Iniciar Sesión", color = MaterialTheme.colorScheme.onPrimary, fontSize = 16.sp)
+                    Text("Iniciar Sesión", color = Color.White, fontSize = 16.sp)
                 }
             }
 
             Spacer(Modifier.height(20.dp))
 
-            // Registro
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("¿Aún no tienes una cuenta? ", color = GrayText, fontSize = 14.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("¿Aún no tienes una cuenta? ", color = GrayText)
                 Text(
                     "Regístrate aquí",
                     color = PurpleMayu,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.clickable { onRegisterClick() } // <-- Usa el callback
+                    modifier = Modifier.clickable { onRegisterClick() }
                 )
             }
 
             Spacer(Modifier.height(30.dp))
 
-            // Iconos de redes sociales (placeholder)
             Text("o conéctate con:", color = GrayText, fontSize = 13.sp)
 
             Spacer(Modifier.height(12.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Email,
-                    contentDescription = "Google",
-                    modifier = Modifier.size(36.dp),
-                    tint = Color.Gray
-                )
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = "Facebook",
-                    modifier = Modifier.size(36.dp),
-                    tint = Color.Gray
-                )
-                Icon(
-                    imageVector = Icons.Filled.Facebook,
-                    contentDescription = "Instagram",
-                    modifier = Modifier.size(36.dp),
-                    tint = Color.Gray
-                )
+            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                Icon(Icons.Filled.Email, null, modifier = Modifier.size(36.dp), tint = GrayText)
+                Icon(Icons.Filled.AccountCircle, null, modifier = Modifier.size(36.dp), tint = GrayText)
+                Icon(Icons.Filled.Facebook, null, modifier = Modifier.size(36.dp), tint = GrayText)
             }
         }
     }

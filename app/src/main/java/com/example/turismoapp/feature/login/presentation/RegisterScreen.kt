@@ -30,19 +30,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.turismoapp.ui.theme.PurpleMayu
+import com.example.turismoapp.ui.theme.GrayText
+import com.example.turismoapp.ui.theme.TextBlack
+import com.example.turismoapp.ui.theme.WhiteBackground
+import com.example.turismoapp.ui.theme.GreenMayu
+import com.example.turismoapp.ui.theme.RedMayu
+import com.example.turismoapp.ui.theme.YellowMayu
+
 import com.example.turismoapp.feature.login.data.repository.AuthRepository
 import com.example.turismoapp.feature.login.domain.usecase.SignUpUseCase
 import com.example.turismoapp.feature.login.domain.usecase.ValidateEmailUseCase
 import com.example.turismoapp.feature.login.domain.usecase.ValidatePasswordUseCase
 import com.google.firebase.auth.FirebaseAuth
 
-// Colores (los mismos del LoginScreen)
-val PrimaryPurple = Color(0xFF6B4EE6)
-val BackgroundGray = Color(0xFFF8F9FA)
-val TextGray = Color(0xFF6C757D)
-val ErrorRed = Color(0xFFDC3545)
-val SuccessGreen = Color(0xFF28A745)
-val WarningYellow = Color(0xFFFFC107)
+val PrimaryPurple = PurpleMayu
+val BackgroundGray = WhiteBackground
+val TextGray = GrayText
+val ErrorRed = RedMayu
+val SuccessGreen = GreenMayu
+val WarningYellow = YellowMayu
+
 
 class RegisterViewModelFactory(
     private val signUpUseCase: SignUpUseCase,
@@ -85,11 +93,9 @@ fun RegisterScreen(
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
-    // Estados locales para mostrar/ocultar contraseñas
     var showPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
 
-    // Validación en tiempo real del email
     var emailError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(uiState.formState.email) {
         emailError = if (uiState.formState.email.isNotEmpty()) {
@@ -97,7 +103,6 @@ fun RegisterScreen(
         } else null
     }
 
-    // Validación en tiempo real de la contraseña
     var passwordError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(uiState.formState.password) {
         passwordError = if (uiState.formState.password.isNotEmpty()) {
@@ -105,17 +110,16 @@ fun RegisterScreen(
         } else null
     }
 
-    // Validación de coincidencia de contraseñas
     var passwordConfirmError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(uiState.formState.password, uiState.formState.passwordConfirm) {
-        passwordConfirmError = if (uiState.formState.passwordConfirm.isNotEmpty()) {
-            if (uiState.formState.password != uiState.formState.passwordConfirm) {
+        passwordConfirmError =
+            if (uiState.formState.passwordConfirm.isNotEmpty() &&
+                uiState.formState.password != uiState.formState.passwordConfirm
+            )
                 "Las contraseñas no coinciden"
-            } else null
-        } else null
+            else null
     }
 
-    // Requisitos de contraseña
     val passwordRequirements = remember(uiState.formState.password) {
         listOf(
             PasswordRequirementItem("Mínimo 6 caracteres", uiState.formState.password.length >= 6),
@@ -127,7 +131,6 @@ fun RegisterScreen(
 
     val allRequirementsMet = passwordRequirements.all { it.met }
 
-    // Manejo de éxito
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
             Toast.makeText(context, "¡Cuenta creada exitosamente!", Toast.LENGTH_SHORT).show()
@@ -135,7 +138,6 @@ fun RegisterScreen(
         }
     }
 
-    // Mostrar errores
     LaunchedEffect(uiState.error) {
         uiState.error?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
@@ -154,7 +156,7 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Botón de retroceso
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -170,7 +172,6 @@ fun RegisterScreen(
                 }
             }
 
-            // Logo o icono
             Card(
                 modifier = Modifier.size(80.dp),
                 shape = RoundedCornerShape(20.dp),
@@ -191,12 +192,11 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Título
             Text(
                 text = "Crear Cuenta",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF212529)
+                color = TextBlack
             )
 
             Text(
@@ -206,8 +206,6 @@ fun RegisterScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
             )
-
-            // Campo de email
             OutlinedTextField(
                 value = uiState.formState.email,
                 onValueChange = { viewModel.onEvent(RegisterEvent.EmailChanged(it)) },
@@ -222,19 +220,11 @@ fun RegisterScreen(
                 },
                 trailingIcon = {
                     if (uiState.formState.email.isNotEmpty()) {
-                        if (emailError == null) {
-                            Icon(
-                                imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "Email válido",
-                                tint = SuccessGreen
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.Error,
-                                contentDescription = "Email inválido",
-                                tint = ErrorRed
-                            )
-                        }
+                        Icon(
+                            imageVector = if (emailError == null) Icons.Filled.CheckCircle else Icons.Filled.Error,
+                            contentDescription = null,
+                            tint = if (emailError == null) SuccessGreen else ErrorRed
+                        )
                     }
                 },
                 isError = emailError != null,
@@ -255,7 +245,7 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = PrimaryPurple,
-                    unfocusedBorderColor = Color(0xFFDEE2E6),
+                    unfocusedBorderColor = GrayText.copy(alpha = 0.3f),
                     errorBorderColor = ErrorRed
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -269,8 +259,6 @@ fun RegisterScreen(
             )
 
             Spacer(Modifier.height(16.dp))
-
-            // Campo de contraseña
             OutlinedTextField(
                 value = uiState.formState.password,
                 onValueChange = { viewModel.onEvent(RegisterEvent.PasswordChanged(it)) },
@@ -288,7 +276,7 @@ fun RegisterScreen(
                         if (uiState.formState.password.isNotEmpty() && passwordError == null) {
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "Contraseña válida",
+                                contentDescription = null,
                                 tint = SuccessGreen,
                                 modifier = Modifier.padding(end = 4.dp)
                             )
@@ -296,7 +284,7 @@ fun RegisterScreen(
                         IconButton(onClick = { showPassword = !showPassword }) {
                             Icon(
                                 imageVector = if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (showPassword) "Ocultar contraseña" else "Mostrar contraseña",
+                                contentDescription = null,
                                 tint = TextGray
                             )
                         }
@@ -321,7 +309,7 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = PrimaryPurple,
-                    unfocusedBorderColor = Color(0xFFDEE2E6),
+                    unfocusedBorderColor = GrayText.copy(alpha = 0.3f),
                     errorBorderColor = ErrorRed
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -336,7 +324,6 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // Campo de confirmar contraseña
             OutlinedTextField(
                 value = uiState.formState.passwordConfirm,
                 onValueChange = { viewModel.onEvent(RegisterEvent.PasswordConfirmChanged(it)) },
@@ -352,26 +339,23 @@ fun RegisterScreen(
                 trailingIcon = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (uiState.formState.passwordConfirm.isNotEmpty()) {
-                            if (passwordConfirmError == null && uiState.formState.password == uiState.formState.passwordConfirm) {
-                                Icon(
-                                    imageVector = Icons.Filled.CheckCircle,
-                                    contentDescription = "Las contraseñas coinciden",
-                                    tint = SuccessGreen,
-                                    modifier = Modifier.padding(end = 4.dp)
-                                )
-                            } else if (passwordConfirmError != null) {
-                                Icon(
-                                    imageVector = Icons.Filled.Error,
-                                    contentDescription = "Las contraseñas no coinciden",
-                                    tint = ErrorRed,
-                                    modifier = Modifier.padding(end = 4.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector =
+                                    if (passwordConfirmError == null && uiState.formState.password == uiState.formState.passwordConfirm)
+                                        Icons.Filled.CheckCircle
+                                    else Icons.Filled.Error,
+                                contentDescription = null,
+                                tint =
+                                    if (passwordConfirmError == null &&
+                                        uiState.formState.password == uiState.formState.passwordConfirm
+                                    ) SuccessGreen else ErrorRed,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
                         }
                         IconButton(onClick = { showConfirmPassword = !showConfirmPassword }) {
                             Icon(
                                 imageVector = if (showConfirmPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                                contentDescription = if (showConfirmPassword) "Ocultar contraseña" else "Mostrar contraseña",
+                                contentDescription = null,
                                 tint = TextGray
                             )
                         }
@@ -396,7 +380,7 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = PrimaryPurple,
-                    unfocusedBorderColor = Color(0xFFDEE2E6),
+                    unfocusedBorderColor = GrayText.copy(alpha = 0.3f),
                     errorBorderColor = ErrorRed
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -406,7 +390,11 @@ fun RegisterScreen(
                 keyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        if (emailError == null && passwordError == null && passwordConfirmError == null) {
+                        if (
+                            emailError == null &&
+                            passwordError == null &&
+                            passwordConfirmError == null
+                        ) {
                             viewModel.onEvent(RegisterEvent.Submit)
                         }
                     }
@@ -416,7 +404,6 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // Tarjeta de requisitos de contraseña
             AnimatedVisibility(
                 visible = uiState.formState.password.isNotEmpty(),
                 enter = fadeIn(),
@@ -424,17 +411,13 @@ fun RegisterScreen(
             ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    ),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        ) {
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Filled.Security,
                                 contentDescription = null,
@@ -446,20 +429,18 @@ fun RegisterScreen(
                                 text = "Requisitos de seguridad:",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF212529)
-                            )
-                        }
-
-                        passwordRequirements.forEach { requirement ->
-                            PasswordRequirementRow(
-                                text = requirement.text,
-                                met = requirement.met
+                                color = TextBlack
                             )
                         }
 
                         Spacer(Modifier.height(8.dp))
 
-                        // Indicador de fortaleza
+                        passwordRequirements.forEach {
+                            PasswordRequirementRow(text = it.text, met = it.met)
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
                         val strength = passwordRequirements.count { it.met }
                         val strengthText = when (strength) {
                             0, 1 -> "Débil"
@@ -473,32 +454,22 @@ fun RegisterScreen(
                             2 -> WarningYellow
                             3 -> Color(0xFF17A2B8)
                             4 -> SuccessGreen
-                            else -> TextGray
+                            else -> GrayText
                         }
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Fortaleza: ",
-                                fontSize = 12.sp,
-                                color = TextGray
-                            )
-                            Text(
-                                text = strengthText,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = strengthColor
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "Fortaleza: ", fontSize = 12.sp, color = GrayText)
+                            Text(text = strengthText, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = strengthColor)
+
                             Spacer(Modifier.width(8.dp))
+
                             LinearProgressIndicator(
                                 progress = strength / 4f,
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(4.dp),
                                 color = strengthColor,
-                                trackColor = Color(0xFFE9ECEF)
+                                trackColor = Color(0xFFE0E0E0)
                             )
                         }
                     }
@@ -507,7 +478,6 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Botón de registro
             Button(
                 onClick = {
                     focusManager.clearFocus()
@@ -521,108 +491,28 @@ fun RegisterScreen(
                         passwordError == null &&
                         passwordConfirmError == null &&
                         allRequirementsMet,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryPurple,
-                    disabledContainerColor = Color(0xFFE9ECEF)
-                ),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryPurple),
                 shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.buttonElevation(
-                    defaultElevation = 4.dp,
-                    pressedElevation = 8.dp,
-                    disabledElevation = 0.dp
-                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(24.dp))
                 } else {
-                    Icon(
-                        imageVector = Icons.Filled.PersonAdd,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Icon(Icons.Filled.PersonAdd, null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "Crear Cuenta",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text("Crear Cuenta", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // Divider con texto
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFDEE2E6))
-                Text(
-                    text = "O regístrate con",
-                    fontSize = 13.sp,
-                    color = TextGray,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Divider(modifier = Modifier.weight(1f), color = Color(0xFFDEE2E6))
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Botón de Google
-            OutlinedButton(
-                onClick = {
-                    Toast.makeText(context, "Próximamente: Registro con Google", Toast.LENGTH_SHORT).show()
-                },
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White
-                ),
-                border = ButtonDefaults.outlinedButtonBorder.copy(
-                    width = 1.dp,
-                    brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFDEE2E6))
-                ),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Email,
-                    contentDescription = null,
-                    tint = Color(0xFFDB4437),
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text = "Continuar con Google",
-                    color = Color(0xFF212529),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(Modifier.height(32.dp))
-
-            // Ya tienes cuenta
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "¿Ya tienes una cuenta? ",
-                    color = TextGray,
-                    fontSize = 14.sp
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("¿Ya tienes una cuenta? ", color = TextGray)
                 Text(
                     "Inicia sesión",
                     color = PrimaryPurple,
-                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onBackToLogin() }
                 )
@@ -640,21 +530,14 @@ data class PasswordRequirementItem(
 
 @Composable
 fun PasswordRequirementRow(text: String, met: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 4.dp)
-    ) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
         Icon(
             imageVector = if (met) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked,
             contentDescription = null,
-            tint = if (met) SuccessGreen else Color(0xFFDEE2E6),
+            tint = if (met) SuccessGreen else GrayText.copy(alpha = 0.3f),
             modifier = Modifier.size(16.dp)
         )
         Spacer(Modifier.width(8.dp))
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            color = if (met) SuccessGreen else TextGray
-        )
+        Text(text = text, fontSize = 12.sp, color = if (met) SuccessGreen else GrayText)
     }
 }

@@ -3,10 +3,10 @@ package com.example.turismoapp.feature.navigation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,7 +26,7 @@ import com.example.turismoapp.feature.profile.presentation.ProfileScreen
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.search.presentation.SearchViewModel
 import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
-import com.example.turismoapp.feature.navigation.Screen
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
@@ -46,7 +46,6 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
-    // Rutas donde NO debe aparecer el BottomBar
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -74,16 +73,16 @@ fun AppNavigation() {
             modifier = Modifier.padding(innerPadding)
         ) {
 
-            // --- SPLASH ---
             composable(Screen.Splash.route) {
-                SplashScreen(onNavigateNext = {
-                    navController.navigate(Screen.Onboarding.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                SplashScreen(
+                    onNavigateNext = {
+                        navController.navigate(Screen.Onboarding.route) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
                     }
-                })
+                )
             }
 
-            // --- ONBOARDING ---
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onSkip = {
@@ -99,7 +98,6 @@ fun AppNavigation() {
                 )
             }
 
-            // --- LOGIN ---
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -113,7 +111,6 @@ fun AppNavigation() {
                 )
             }
 
-            // --- REGISTER ---
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onRegistrationSuccess = {
@@ -127,25 +124,29 @@ fun AppNavigation() {
                 )
             }
 
-            // --- HOME ---
+            // 🏠 HOME — AHORA CON CALLBACKS PARA HEADER Y CLICK EN TARJETAS
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
-                HomeScreen(state = state.value, onRetry = { vm.load() })
+
+                HomeScreen(
+                    state = state.value,
+                    onRetry = { vm.load() },
+                    onProfileClick = { navController.navigate(Screen.Profile.route) },
+                    onNotificationClick = { /* Ícono estático, no hace nada */ },
+                    onPlaceClick = { id ->
+                        navController.navigate(Screen.DetailPlace.create(id))
+                    }
+                )
             }
 
-            // --- CALENDAR ---
             composable(Screen.Calendar.route) { Text("Calendario") }
-
-            // --- PACKAGES ---
             composable(Screen.Packages.route) { Text("Paquetes") }
 
-            // --- MOVIES ---
             composable(Screen.PopularMovies.route) {
                 PopularMoviesScreen()
             }
 
-            // --- PROFILE ---
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onBack = { navController.popBackStack() },
@@ -157,7 +158,6 @@ fun AppNavigation() {
                 )
             }
 
-            // --- EDIT PROFILE ---
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onBack = { navController.popBackStack() },
@@ -165,13 +165,11 @@ fun AppNavigation() {
                 )
             }
 
-            // --- EXTRAS ---
             composable(Screen.Favorites.route) { Text("Favoritos") }
             composable(Screen.Trips.route) { Text("Mis Viajes") }
             composable(Screen.Settings.route) { Text("Configuración") }
             composable(Screen.Language.route) { Text("Idioma") }
 
-            // --- DETALLE DE LUGAR ---
             composable(
                 route = Screen.DetailPlace.route,
                 arguments = listOf(navArgument("placeId") { type = NavType.StringType })
@@ -189,7 +187,7 @@ fun AppNavigation() {
         }
     }
 
-    // --- SEARCH BOTTOM SHEET ---
+    // 🔍 SEARCH BOTTOM SHEET
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },
