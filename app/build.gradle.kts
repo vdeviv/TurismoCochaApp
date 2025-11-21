@@ -68,12 +68,11 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
+    // --- FIREBASE ---
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.messaging)
-    implementation(libs.firebase.auth)
-    implementation(libs.kotlinx.coroutines.play.services)
-    implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.bundles.firebase)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
 
     // --- GOOGLE SIGN-IN ---
     implementation("com.google.android.gms:play-services-auth:21.2.0")
@@ -108,6 +107,7 @@ dependencies {
     // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
     implementation(libs.firebase.firestore.ktx)
+    implementation("com.google.firebase:firebase-storage-ktx")
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 

@@ -26,7 +26,7 @@ import com.example.turismoapp.feature.movie.presentation.PopularMoviesViewModel
 // 🔥 FIREBASE IMPORTS
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
+import com.google.firebase.storage.FirebaseStorage
 // 🔥 AUTH
 import com.example.turismoapp.feature.login.data.repository.AuthRepository
 import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
@@ -39,6 +39,11 @@ import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
 import com.example.turismoapp.feature.profile.domain.usecase.SaveProfileUseCase
 import com.example.turismoapp.feature.profile.domain.usecase.UpdateProfileUseCase
 import com.example.turismoapp.feature.profile.domain.usecase.DeleteProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.UploadAvatarUseCase
+
+// ✅ IMPORTAR LAS INTERFACES DE STORAGE
+import com.example.turismoapp.feature.profile.domain.repository.IStorageRepository
+import com.example.turismoapp.feature.profile.data.repository.StorageRepositoryImpl
 
 // 🟢 ONBOARDING (Integrado en este mismo módulo)
 import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
@@ -93,9 +98,11 @@ val appModule = module {
             .build()
     }
 
-    // 🔥 FIREBASE - NUEVAS INSTANCIAS
+    // 🔥 FIREBASE - NUEVAS INSTANCIAS (Añadir Storage)
     single { FirebaseAuth.getInstance() }
     single { FirebaseFirestore.getInstance() }
+    // ✅ 1. Definir la instancia de Firebase Storage
+    single { FirebaseStorage.getInstance() }
 
     // 🔥 AUTH REPOSITORY
     single<IAuthRepository> { AuthRepository(get()) }
@@ -109,8 +116,15 @@ val appModule = module {
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
+    single<IStorageRepository> {
+        StorageRepositoryImpl(get()) // Le pasamos FirebaseStorage.getInstance()
+    }
+
+    factory { UploadAvatarUseCase(get()) } // Le pasamos IStorageRepository
+
     // 🔥 PROFILE - REPOSITORIO ACTUALIZADO CON FIRESTORE
     single<IProfileRepository> { ProfileRepository(get()) }
+
 
     // 🔥 PROFILE - USECASES COMPLETOS
     factory { GetProfileUseCase(get()) }
@@ -125,6 +139,7 @@ val appModule = module {
             saveProfileUseCase = get(),
             updateProfileUseCase = get(),
             deleteProfileUseCase = get(),
+            uploadAvatarUseCase = get(),
             firebaseAuth = get()
         )
     }

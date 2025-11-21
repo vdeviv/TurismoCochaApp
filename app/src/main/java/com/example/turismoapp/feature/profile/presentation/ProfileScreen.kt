@@ -1,267 +1,96 @@
 package com.example.turismoapp.feature.profile.presentation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
-    onBack: () -> Unit = {},
-    onEditProfile: () -> Unit = {},
-    onFavorites: () -> Unit = {},
-    onTrips: () -> Unit = {},
-    onSettings: () -> Unit = {},
-    onLanguage: () -> Unit = {},
-    onLogout: () -> Unit = {}
+    onBack: () -> Unit,
+    onEditProfile: () -> Unit,
+    onFavorites: () -> Unit,
+    onTrips: () -> Unit,
+    onSettings: () -> Unit,
+    onLanguage: () -> Unit
 ) {
-    val state = profileViewModel.state.collectAsState()
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    val state by profileViewModel.state.collectAsState()
 
-    LaunchedEffect(Unit) {
-        profileViewModel.loadProfile()
-    }
+    var name by remember { mutableStateOf(TextFieldValue("")) }
+    var phone by remember { mutableStateOf(TextFieldValue("")) }
+    var summary by remember { mutableStateOf(TextFieldValue("")) }
 
-    // Si la cuenta fue eliminada, navegar al login
-    LaunchedEffect(state.value) {
-        if (state.value is ProfileViewModel.ProfileUiState.Deleted) {
-            onLogout()
-        }
-    }
+    LaunchedEffect(Unit) { profileViewModel.loadProfile() }
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Perfil") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onEditProfile) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
-                    }
-                }
+    Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        when (state) {
+            is ProfileViewModel.ProfileUiState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            is ProfileViewModel.ProfileUiState.Error -> Text(
+                text = (state as ProfileViewModel.ProfileUiState.Error).message,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center)
             )
-        }
-    ) { padding ->
-
-        when (val st = state.value) {
-
-            ProfileViewModel.ProfileUiState.Loading ->
-                LoadingView(padding)
-
-            is ProfileViewModel.ProfileUiState.Error ->
-                ErrorView(padding, st.message)
-
             is ProfileViewModel.ProfileUiState.Success -> {
-                val profile = st.profile
+                val profile = (state as ProfileViewModel.ProfileUiState.Success).profile
+                LaunchedEffect(profile) {
+                    name = TextFieldValue(profile.name)
+                    phone = TextFieldValue(profile.cellphone)
+                    summary = TextFieldValue(profile.summary)
+                }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Spacer(Modifier.height(20.dp))
-
-                    AsyncImage(
-                        model = profile.pathUrl.ifBlank { "https://cdn-icons-png.flaticon.com/512/149/149071.png" },
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFF1F1F1), CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Text(
-                        text = profile.name.ifBlank { "Completa tu perfil" },
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = profile.email,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-
-                    Spacer(Modifier.height(24.dp))
-
-                    StatsCard()
-
-                    Spacer(Modifier.height(24.dp))
-
-                    MenuOption("Editar perfil", Icons.Default.Edit) { onEditProfile() }
-                    MenuOption("Favoritos", Icons.Outlined.FavoriteBorder) { onFavorites() }
-                    MenuOption("Viajes previos", Icons.Outlined.History) { onTrips() }
-                    MenuOption("Ajustes", Icons.Outlined.Settings) { onSettings() }
-                    MenuOption("Idioma", Icons.Outlined.Language) { onLanguage() }
-                    MenuOption("Cerrar sesión", Icons.Outlined.ExitToApp) {
-                        profileViewModel.signOut()
-                        onLogout()
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(profile.pathUrl)
+                                    .crossfade(true)
+                                    .build()
+                            ),
+                            contentDescription = "Avatar",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(80.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(text = profile.email)
                     }
-                    MenuOption(
-                        title = "Eliminar cuenta",
-                        icon = Icons.Outlined.Delete,
-                        isDestructive = true
-                    ) {
-                        showDeleteDialog = true
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text("Nombre")
+                    BasicTextField(value = name, onValueChange = { name = it }, modifier = Modifier.fillMaxWidth().padding(4.dp))
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text("Teléfono")
+                    BasicTextField(value = phone, onValueChange = { phone = it }, modifier = Modifier.fillMaxWidth().padding(4.dp))
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text("Resumen")
+                    BasicTextField(value = summary, onValueChange = { summary = it }, modifier = Modifier.fillMaxWidth().height(100.dp).padding(4.dp))
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(onClick = { profileViewModel.updateProfile(name.text, profile.email, phone.text, summary.text) }) {
+                        Text("Guardar Cambios")
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-
             else -> {}
         }
-    }
-
-    // Diálogo de confirmación para eliminar cuenta
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("¿Eliminar cuenta?") },
-            text = {
-                Text("Esta acción no se puede deshacer. Se eliminará tu cuenta y todos tus datos permanentemente.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        profileViewModel.deleteAccount()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
-                ) {
-                    Text("Eliminar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancelar")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-private fun LoadingView(padding: PaddingValues) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorView(padding: PaddingValues, message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Error: $message", color = Color.Red)
-        }
-    }
-}
-
-@Composable
-private fun StatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7))
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 18.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Stat("Puntos de viaje", "360")
-            StatDivider()
-            Stat("Viajes", "238")
-            StatDivider()
-            Stat("Lista de deseos", "473")
-        }
-    }
-}
-
-@Composable
-private fun Stat(title: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            value,
-            color = Color(0xFF9C27B0),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(title, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-private fun StatDivider() {
-    Box(
-        modifier = Modifier
-            .height(45.dp)
-            .width(1.dp)
-            .background(Color(0xFFE0E0E0))
-    )
-}
-
-@Composable
-private fun MenuOption(
-    title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isDestructive: Boolean = false,
-    onClick: () -> Unit
-) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                icon,
-                title,
-                tint = if (isDestructive) Color.Red else Color(0x80111111)
-            )
-            Spacer(Modifier.width(16.dp))
-            Text(
-                title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isDestructive) Color.Red else Color.Unspecified
-            )
-        }
-
-        HorizontalDivider(color = Color(0xFFEAEAEA))
     }
 }

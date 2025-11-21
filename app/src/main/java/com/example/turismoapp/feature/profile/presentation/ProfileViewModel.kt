@@ -1,25 +1,25 @@
 package com.example.turismoapp.feature.profile.presentation
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.turismoapp.feature.profile.domain.model.ProfileModel
-import com.example.turismoapp.feature.profile.domain.usecase.DeleteProfileUseCase
-import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
-import com.example.turismoapp.feature.profile.domain.usecase.SaveProfileUseCase
-import com.example.turismoapp.feature.profile.domain.usecase.UpdateProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.*
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val saveProfileUseCase: SaveProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val deleteProfileUseCase: DeleteProfileUseCase,
+    private val uploadAvatarUseCase: UploadAvatarUseCase,
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
@@ -31,10 +31,10 @@ class ProfileViewModel(
         object Deleted : ProfileUiState()
     }
 
-    private var _state = MutableStateFlow<ProfileUiState>(ProfileUiState.Init)
+    private val _state = MutableStateFlow<ProfileUiState>(ProfileUiState.Init)
     val state: StateFlow<ProfileUiState> = _state.asStateFlow()
 
-    // Cargar perfil del usuario actual
+    // Cargar perfil del usuario
     fun loadProfile() {
         val uid = firebaseAuth.currentUser?.uid
         if (uid == null) {
@@ -44,13 +44,14 @@ class ProfileViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ProfileUiState.Loading
+
             val result = getProfileUseCase.invoke(uid)
             result.fold(
-                onSuccess = {
-                    _state.value = ProfileUiState.Success(it)
+                onSuccess = { profile ->
+                    _state.value = ProfileUiState.Success(profile)
                 },
                 onFailure = {
-                    // Si el perfil no existe, crear uno nuevo con datos básicos
+                    // Si no existe perfil, creamos uno inicial
                     val currentUser = firebaseAuth.currentUser
                     if (currentUser != null) {
                         val newProfile = ProfileModel(
@@ -70,49 +71,40 @@ class ProfileViewModel(
         }
     }
 
-    // Guardar perfil nuevo
+    // Guardar perfil
     fun saveProfile(profile: ProfileModel) {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ProfileUiState.Loading
             val result = saveProfileUseCase.invoke(profile)
             result.fold(
-                onSuccess = {
-                    _state.value = ProfileUiState.Success(profile)
-                },
+                onSuccess = { _state.value = ProfileUiState.Success(profile) },
                 onFailure = {
-                    _state.value = ProfileUiState.Error(it.message ?: "Error al guardar")
+                    Log.e("SaveProfileError", "Error al guardar perfil", it)
+                    _state.value = ProfileUiState.Error(it.message ?: "Error desconocido")
                 }
             )
         }
     }
 
-    // Actualizar perfil existente
+    // Actualizar perfil
     fun updateProfile(name: String, email: String, phone: String, summary: String) {
-        val currentState = _state.value
-        if (currentState !is ProfileUiState.Success) return
-
-        val updatedProfile = currentState.profile.copy(
+        val current = _state.value as? ProfileUiState.Success ?: return
+        val updated = current.profile.copy(
             name = name,
-            email = email,
+            email = current.profile.email,
             cellphone = phone,
             summary = summary
         )
-
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ProfileUiState.Loading
-            val result = updateProfileUseCase.invoke(updatedProfile)
-            result.fold(
-                onSuccess = {
-                    _state.value = ProfileUiState.Success(updatedProfile)
-                },
-                onFailure = {
-                    _state.value = ProfileUiState.Error(it.message ?: "Error al actualizar")
-                }
+            updateProfileUseCase.invoke(updated).fold(
+                onSuccess = { _state.value = ProfileUiState.Success(updated) },
+                onFailure = { _state.value = ProfileUiState.Error(it.message ?: "Error al actualizar") }
             )
         }
     }
 
-    // Eliminar cuenta completa
+    // Eliminar perfil
     fun deleteAccount() {
         val uid = firebaseAuth.currentUser?.uid
         if (uid == null) {
@@ -122,13 +114,8 @@ class ProfileViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ProfileUiState.Loading
-
-            // Primero eliminar el perfil de Firestore
-            val deleteProfileResult = deleteProfileUseCase.invoke(uid)
-
-            deleteProfileResult.fold(
+            deleteProfileUseCase.invoke(uid).fold(
                 onSuccess = {
-                    // Luego eliminar la cuenta de Firebase Auth
                     try {
                         firebaseAuth.currentUser?.delete()?.await()
                         _state.value = ProfileUiState.Deleted
@@ -136,16 +123,29 @@ class ProfileViewModel(
                         _state.value = ProfileUiState.Error("Error al eliminar cuenta: ${e.localizedMessage}")
                     }
                 },
-                onFailure = {
-                    _state.value = ProfileUiState.Error(it.message ?: "Error al eliminar perfil")
-                }
+                onFailure = { _state.value = ProfileUiState.Error(it.message ?: "Error al eliminar perfil") }
             )
         }
     }
 
-    // Cerrar sesión
-    fun signOut() {
-        firebaseAuth.signOut()
-        _state.value = ProfileUiState.Init
+    // Subir avatar
+    fun uploadNewAvatar(uri: Uri) {
+        val uid = firebaseAuth.currentUser?.uid ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val uploadResult = uploadAvatarUseCase.invoke(uid, uri)
+            uploadResult.fold(
+                onSuccess = { newUrl ->
+                    val current = _state.value
+                    if (current is ProfileUiState.Success) {
+                        val updated = current.profile.copy(pathUrl = newUrl)
+                        updateProfileUseCase.invoke(updated).fold(
+                            onSuccess = { _state.value = ProfileUiState.Success(updated) },
+                            onFailure = { _state.value = ProfileUiState.Error("Error al actualizar imagen") }
+                        )
+                    }
+                },
+                onFailure = { _state.value = ProfileUiState.Error("Error al subir imagen: ${it.message}") }
+            )
+        }
     }
 }

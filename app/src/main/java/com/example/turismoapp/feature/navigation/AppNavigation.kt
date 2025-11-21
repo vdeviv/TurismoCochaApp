@@ -160,8 +160,7 @@ fun AppNavigation() {
 
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
-                    // onBack = { navController.popBackStack() }, // <-- ¡ELIMINAR O COMENTAR ESTA LÍNEA!
-                    onSave = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() }
                 )
             }
 
