@@ -8,6 +8,7 @@ import com.example.turismoapp.feature.profile.domain.vo.UrlPath
 
 
 data class ProfileModel(
+    val uid: String = "",  // UID del usuario de Firebase Auth
     val pathUrl: String = "",
     val name: String = "",
     val email: String = "",

@@ -23,10 +23,22 @@ import com.example.turismoapp.feature.movie.domain.repository.IMoviesRepository
 import com.example.turismoapp.feature.movie.domain.usecase.FetchPopularMoviesUseCase
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesViewModel
 
+// 🔥 FIREBASE IMPORTS
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
+// 🔥 AUTH
+import com.example.turismoapp.feature.login.data.repository.AuthRepository
+import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
+
+// 🔥 PROFILE - NUEVOS IMPORTS
 import com.example.turismoapp.feature.profile.presentation.ProfileViewModel
 import com.example.turismoapp.feature.profile.data.repository.ProfileRepository
 import com.example.turismoapp.feature.profile.domain.repository.IProfileRepository
 import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.SaveProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.UpdateProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.DeleteProfileUseCase
 
 // 🟢 ONBOARDING (Integrado en este mismo módulo)
 import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
@@ -37,9 +49,7 @@ import com.example.turismoapp.feature.onboarding.domain.usecase.SaveOnboardingCo
 import com.example.turismoapp.feature.onboarding.presentation.OnboardingViewModel
 
 import okhttp3.OkHttpClient
-import org.koin.android.BuildConfig
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -83,6 +93,12 @@ val appModule = module {
             .build()
     }
 
+    // 🔥 FIREBASE - NUEVAS INSTANCIAS
+    single { FirebaseAuth.getInstance() }
+    single { FirebaseFirestore.getInstance() }
+
+    // 🔥 AUTH REPOSITORY
+    single<IAuthRepository> { AuthRepository(get()) }
 
     single<GithubService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
@@ -93,9 +109,25 @@ val appModule = module {
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
-    single<IProfileRepository> { ProfileRepository() }
+    // 🔥 PROFILE - REPOSITORIO ACTUALIZADO CON FIRESTORE
+    single<IProfileRepository> { ProfileRepository(get()) }
+
+    // 🔥 PROFILE - USECASES COMPLETOS
     factory { GetProfileUseCase(get()) }
-    viewModel { ProfileViewModel(get()) }
+    factory { SaveProfileUseCase(get()) }
+    factory { UpdateProfileUseCase(get()) }
+    factory { DeleteProfileUseCase(get()) }
+
+    // 🔥 PROFILE - VIEWMODEL COMPLETO
+    viewModel {
+        ProfileViewModel(
+            getProfileUseCase = get(),
+            saveProfileUseCase = get(),
+            updateProfileUseCase = get(),
+            deleteProfileUseCase = get(),
+            firebaseAuth = get()
+        )
+    }
 
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }

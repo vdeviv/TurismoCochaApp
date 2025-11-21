@@ -1,6 +1,5 @@
 package com.example.turismoapp.feature.profile.presentation
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,14 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,24 +21,30 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
     onBack: () -> Unit = {},
     onEditProfile: () -> Unit = {},
-
     onFavorites: () -> Unit = {},
     onTrips: () -> Unit = {},
     onSettings: () -> Unit = {},
     onLanguage: () -> Unit = {},
-
+    onLogout: () -> Unit = {}
 ) {
     val state = profileViewModel.state.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        profileViewModel.showProfile()
+        profileViewModel.loadProfile()
+    }
+
+    // Si la cuenta fue eliminada, navegar al login
+    LaunchedEffect(state.value) {
+        if (state.value is ProfileViewModel.ProfileUiState.Deleted) {
+            onLogout()
+        }
     }
 
     Scaffold(
@@ -99,7 +99,7 @@ fun ProfileScreen(
                     Spacer(Modifier.height(12.dp))
 
                     Text(
-                        text = profile.name,
+                        text = profile.name.ifBlank { "Completa tu perfil" },
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                     Text(
@@ -114,16 +114,54 @@ fun ProfileScreen(
 
                     Spacer(Modifier.height(24.dp))
 
-                    MenuOption("Editar perfil", Icons.Default.Edit, onEditProfile)
-                    MenuOption("Favoritos", Icons.Outlined.FavoriteBorder, onFavorites)
-                    MenuOption("Viajes previos", Icons.Outlined.History, onTrips)
-                    MenuOption("Ajustes", Icons.Outlined.Settings, onSettings)
-                    MenuOption("Idioma", Icons.Outlined.Language, onLanguage)
+                    MenuOption("Editar perfil", Icons.Default.Edit) { onEditProfile() }
+                    MenuOption("Favoritos", Icons.Outlined.FavoriteBorder) { onFavorites() }
+                    MenuOption("Viajes previos", Icons.Outlined.History) { onTrips() }
+                    MenuOption("Ajustes", Icons.Outlined.Settings) { onSettings() }
+                    MenuOption("Idioma", Icons.Outlined.Language) { onLanguage() }
+                    MenuOption("Cerrar sesión", Icons.Outlined.ExitToApp) {
+                        profileViewModel.signOut()
+                        onLogout()
+                    }
+                    MenuOption(
+                        title = "Eliminar cuenta",
+                        icon = Icons.Outlined.Delete,
+                        isDestructive = true
+                    ) {
+                        showDeleteDialog = true
+                    }
                 }
             }
 
             else -> {}
         }
+    }
+
+    // Diálogo de confirmación para eliminar cuenta
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("¿Eliminar cuenta?") },
+            text = {
+                Text("Esta acción no se puede deshacer. Se eliminará tu cuenta y todos tus datos permanentemente.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        profileViewModel.deleteAccount()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 }
 
@@ -147,7 +185,9 @@ private fun ErrorView(padding: PaddingValues, message: String) {
             .padding(padding),
         contentAlignment = Alignment.Center
     ) {
-        Text("Error: $message", color = Color.Red)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Error: $message", color = Color.Red)
+        }
     }
 }
 
@@ -163,9 +203,9 @@ private fun StatsCard() {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Stat("Puntos de viaje", "360")
-            VerticalDivider()
+            StatDivider()
             Stat("Viajes", "238")
-            VerticalDivider()
+            StatDivider()
             Stat("Lista de deseos", "473")
         }
     }
@@ -185,12 +225,12 @@ private fun Stat(title: String, value: String) {
 }
 
 @Composable
-private fun VerticalDivider() {
-    Divider(
+private fun StatDivider() {
+    Box(
         modifier = Modifier
             .height(45.dp)
-            .width(1.dp),
-        color = Color(0xFFE0E0E0)
+            .width(1.dp)
+            .background(Color(0xFFE0E0E0))
     )
 }
 
@@ -198,6 +238,7 @@ private fun VerticalDivider() {
 private fun MenuOption(
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isDestructive: Boolean = false,
     onClick: () -> Unit
 ) {
     Column {
@@ -208,11 +249,19 @@ private fun MenuOption(
                 .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(icon, title, tint = Color(0x80111111))
+            Icon(
+                icon,
+                title,
+                tint = if (isDestructive) Color.Red else Color(0x80111111)
+            )
             Spacer(Modifier.width(16.dp))
-            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isDestructive) Color.Red else Color.Unspecified
+            )
         }
 
-        Divider(color = Color(0xFFEAEAEA))
+        HorizontalDivider(color = Color(0xFFEAEAEA))
     }
 }

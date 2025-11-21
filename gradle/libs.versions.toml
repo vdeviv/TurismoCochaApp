@@ -38,6 +38,7 @@ kotlinxCoroutinesPlayServices = "1.9.0"
 accompanist = "0.28.0"
 datastore = "1.1.1"
 
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" } # <-- ¡Nueva línea!
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -94,7 +95,7 @@ room-rxjava3 = { group="androidx.room", name="room-rxjava3", version.ref="room"}
 room-guava = { group="androidx.room", name="room-guava", version.ref="room"}
 room-testing = { group="androidx.room", name="room-testing", version.ref="room"}
 room-paging = { group="androidx.room", name="room-paging", version.ref="room"}
-
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
