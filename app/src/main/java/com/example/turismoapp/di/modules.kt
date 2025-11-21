@@ -31,9 +31,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.example.turismoapp.feature.login.data.repository.AuthRepository
 import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
 
-// 🔥 PROFILE - NUEVOS IMPORTS
+// 🔥 PROFILE
 import com.example.turismoapp.feature.profile.presentation.ProfileViewModel
-import com.example.turismoapp.feature.profile.data.repository.ProfileRepository
+import com.example.turismoapp.feature.profile.data.repository.ProfileRepository // Importar la implementación correcta
 import com.example.turismoapp.feature.profile.domain.repository.IProfileRepository
 import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
 import com.example.turismoapp.feature.profile.domain.usecase.SaveProfileUseCase
@@ -45,7 +45,7 @@ import com.example.turismoapp.feature.profile.domain.usecase.UploadAvatarUseCase
 import com.example.turismoapp.feature.profile.domain.repository.IStorageRepository
 import com.example.turismoapp.feature.profile.data.repository.StorageRepositoryImpl
 
-// 🟢 ONBOARDING (Integrado en este mismo módulo)
+// 🟢 ONBOARDING
 import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
 import com.example.turismoapp.feature.onboarding.data.repository.OnboardingRepository
 import com.example.turismoapp.feature.onboarding.domain.repository.IOnboardingRepository
@@ -104,9 +104,12 @@ val appModule = module {
     // ✅ 1. Definir la instancia de Firebase Storage
     single { FirebaseStorage.getInstance() }
 
-    // 🔥 AUTH REPOSITORY
-    single<IAuthRepository> { AuthRepository(get()) }
 
+    // 🔥 AUTH REPOSITORY
+    single<IAuthRepository> { AuthRepository(get()) } // Usa FirebaseAuth
+
+
+    // --- GitHub Module ---
     single<GithubService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
             .create(GithubService::class.java)
@@ -116,23 +119,21 @@ val appModule = module {
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
-    single<IStorageRepository> {
-        StorageRepositoryImpl(get()) // Le pasamos FirebaseStorage.getInstance()
-    }
 
-    factory { UploadAvatarUseCase(get()) } // Le pasamos IStorageRepository
+    // --- PROFILE MODULE ---
 
-    // 🔥 PROFILE - REPOSITORIO ACTUALIZADO CON FIRESTORE
-    single<IProfileRepository> { ProfileRepository(get()) }
+    // Repositorios
+    single<IProfileRepository> { ProfileRepository(get()) } // Usa FirebaseFirestore
+    single<IStorageRepository> { StorageRepositoryImpl(get()) } // Usa FirebaseStorage
 
-
-    // 🔥 PROFILE - USECASES COMPLETOS
+    // Use Cases
     factory { GetProfileUseCase(get()) }
     factory { SaveProfileUseCase(get()) }
     factory { UpdateProfileUseCase(get()) }
     factory { DeleteProfileUseCase(get()) }
+    factory { UploadAvatarUseCase(get()) }
 
-    // 🔥 PROFILE - VIEWMODEL COMPLETO
+    // ViewModel
     viewModel {
         ProfileViewModel(
             getProfileUseCase = get(),
@@ -140,10 +141,13 @@ val appModule = module {
             updateProfileUseCase = get(),
             deleteProfileUseCase = get(),
             uploadAvatarUseCase = get(),
-            firebaseAuth = get()
+            firebaseAuth = get() // Usa FirebaseAuth
         )
     }
+    // --- FIN PROFILE MODULE ---
 
+
+    // --- Dollar Module ---
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
@@ -153,6 +157,7 @@ val appModule = module {
     viewModel { DollarViewModel(get()) }
 
 
+    // --- Movie Module ---
     single(named("apiKey")) {
         androidApplication().getString(R.string.api_key)
     }
@@ -167,6 +172,8 @@ val appModule = module {
     factory { FetchPopularMoviesUseCase(get()) }
     viewModel { PopularMoviesViewModel(get()) }
 
+
+    // --- Onboarding Module ---
     single { OnboardingDataStore(get<android.content.Context>()) }
 
     single<IOnboardingRepository> {

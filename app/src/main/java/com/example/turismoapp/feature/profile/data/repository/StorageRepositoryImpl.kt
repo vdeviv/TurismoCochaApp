@@ -5,23 +5,16 @@ import com.example.turismoapp.feature.profile.domain.repository.IStorageReposito
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
-class StorageRepositoryImpl(
-    private val storage: FirebaseStorage // Inyectamos la instancia de Firebase Storage
+class StorageRepositoryImpl(private val storage: FirebaseStorage
 ) : IStorageRepository {
 
-    override suspend fun uploadFile(fileUri: Uri, path: String): Result<String> {
-        return try {
-            val storageRef = storage.reference.child(path)
-
-            // 1. Subir el archivo
-            storageRef.putFile(fileUri).await()
-
-            // 2. Obtener la URL de descarga (el pathUrl)
-            val downloadUrl = storageRef.downloadUrl.await().toString()
-
-            Result.success(downloadUrl)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun uploadFile(uri: Uri, path: String): Result<String> = try {
+        val storageRef = storage.reference.child(path)
+        val uploadTask = storageRef.putFile(uri).await()
+        // Obtener la URL de descarga para guardarla en Firestore
+        val downloadUrl = uploadTask.storage.downloadUrl.await().toString()
+        Result.success(downloadUrl)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

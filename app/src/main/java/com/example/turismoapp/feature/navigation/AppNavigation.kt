@@ -149,12 +149,31 @@ fun AppNavigation() {
 
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onBack = { navController.popBackStack() },
-                    onEditProfile = { navController.navigate(Screen.EditProfile.route) },
-                    onFavorites = { navController.navigate(Screen.Favorites.route) },
-                    onTrips = { navController.navigate(Screen.Trips.route) },
-                    onSettings = { navController.navigate(Screen.Settings.route) },
-                    onLanguage = { navController.navigate(Screen.Language.route) }
+                    // Navegación a la pantalla de edición
+                    onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
+
+                    // Redirección al Cerrar Sesión
+                    onSignOut = {
+                        // Lógica para navegar a la pantalla de Login después del cierre de sesión
+                        navController.navigate(Screen.Login.route) {
+                            // Esto limpia la pila de navegación para que el usuario no pueda volver al perfil
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    },
+
+                    // Redirección al Eliminar Cuenta
+                    onDeleteAccount = {
+                        // Lógica para navegar a la pantalla de Login después de la eliminación de cuenta
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
 
