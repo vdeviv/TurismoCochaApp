@@ -52,8 +52,8 @@ dependencies {
 
     // --- CORE ANDROIDX ---
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx) // Usa la versión de libs.versions.toml (2.9.3)
+    implementation(libs.androidx.activity.compose)      // Usa la versión de libs.versions.toml (1.9.0)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -68,7 +68,6 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
 
     // --- FIREBASE ---
-    // --- FIREBASE ---
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
     implementation(libs.firebase.firestore.ktx)
@@ -80,7 +79,6 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
 
 
-
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
@@ -89,11 +87,12 @@ dependencies {
     // --- COIL (IMÁGENES EN COMPOSE) ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // --- LIFECYCLE / VIEWMODEL COMPOSE ---
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
+    // --- LIFECYCLE / VIEWMODEL COMPOSE (SOLO DEJAMOS LAS VERSIONES CORRECTAS Y CONSISTENTES) ---
+    // Estas líneas fueron eliminadas/comentadas:
+    // implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    // implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    // Ahora usamos las referencias de libs que apuntan a activityCompose=1.9.0 y lifecycleRuntimeKtx=2.9.3
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // Usará 2.5.1 de la sección [versions]
 
     // --- NAVIGATION COMPOSE ---
     implementation(libs.androidx.navigation.compose)
@@ -127,5 +126,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }
