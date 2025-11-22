@@ -3,18 +3,13 @@ package com.example.turismoapp.feature.navigation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
@@ -26,6 +21,11 @@ import com.example.turismoapp.feature.profile.presentation.ProfileScreen
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.search.presentation.SearchViewModel
 import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
+
+// 🔥 IMPORT CALENDARIO
+import com.example.turismoapp.feature.calendar.CalendarScreen
+import com.example.turismoapp.feature.calendar.CalendarViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,7 +124,6 @@ fun AppNavigation() {
                 )
             }
 
-            // 🏠 HOME — AHORA CON CALLBACKS PARA HEADER Y CLICK EN TARJETAS
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
@@ -133,14 +132,22 @@ fun AppNavigation() {
                     state = state.value,
                     onRetry = { vm.load() },
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
-                    onNotificationClick = { /* Ícono estático, no hace nada */ },
+                    onNotificationClick = { },
                     onPlaceClick = { id ->
                         navController.navigate(Screen.DetailPlace.create(id))
                     }
                 )
             }
 
-            composable(Screen.Calendar.route) { Text("Calendario") }
+            // 🔥 CALENDARIO REAL
+            composable(Screen.Calendar.route) {
+                val calendarVM: CalendarViewModel = koinViewModel()
+                CalendarScreen(
+                    navController = navController,
+                    viewModel = calendarVM
+                )
+            }
+
             composable(Screen.Packages.route) { Text("Paquetes") }
 
             composable(Screen.PopularMovies.route) {

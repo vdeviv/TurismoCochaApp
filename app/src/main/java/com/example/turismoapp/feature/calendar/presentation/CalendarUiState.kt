@@ -1,0 +1,12 @@
+package com.example.turismoapp.feature.calendar.presentation
+
+import com.example.turismoapp.feature.calendar.domain.model.CalendarEvent
+import java.time.LocalDate
+
+data class CalendarUiState(
+    val selectedDate: LocalDate = LocalDate.now(),
+    val currentMonth: LocalDate = LocalDate.now().withDayOfMonth(1),
+    val events: List<CalendarEvent> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
