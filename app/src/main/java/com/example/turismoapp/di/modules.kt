@@ -23,12 +23,29 @@ import com.example.turismoapp.feature.movie.domain.repository.IMoviesRepository
 import com.example.turismoapp.feature.movie.domain.usecase.FetchPopularMoviesUseCase
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesViewModel
 
+// 🔥 FIREBASE IMPORTS
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+// 🔥 AUTH
+import com.example.turismoapp.feature.login.data.repository.AuthRepository
+import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
+
+// 🔥 PROFILE
 import com.example.turismoapp.feature.profile.presentation.ProfileViewModel
-import com.example.turismoapp.feature.profile.data.repository.ProfileRepository
+import com.example.turismoapp.feature.profile.data.repository.ProfileRepository // Importar la implementación correcta
 import com.example.turismoapp.feature.profile.domain.repository.IProfileRepository
 import com.example.turismoapp.feature.profile.domain.usecase.GetProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.SaveProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.UpdateProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.DeleteProfileUseCase
+import com.example.turismoapp.feature.profile.domain.usecase.UploadAvatarUseCase
 
-// 🟢 ONBOARDING (Integrado en este mismo módulo)
+// ✅ IMPORTAR LAS INTERFACES DE STORAGE
+import com.example.turismoapp.feature.profile.domain.repository.IStorageRepository
+import com.example.turismoapp.feature.profile.data.repository.StorageRepositoryImpl
+
+// 🟢 ONBOARDING
 import com.example.turismoapp.feature.onboarding.data.datastore.OnboardingDataStore
 import com.example.turismoapp.feature.onboarding.data.repository.OnboardingRepository
 import com.example.turismoapp.feature.onboarding.domain.repository.IOnboardingRepository
@@ -37,9 +54,7 @@ import com.example.turismoapp.feature.onboarding.domain.usecase.SaveOnboardingCo
 import com.example.turismoapp.feature.onboarding.presentation.OnboardingViewModel
 
 import okhttp3.OkHttpClient
-import org.koin.android.BuildConfig
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -83,7 +98,18 @@ val appModule = module {
             .build()
     }
 
+    // 🔥 FIREBASE - NUEVAS INSTANCIAS (Añadir Storage)
+    single { FirebaseAuth.getInstance() }
+    single { FirebaseFirestore.getInstance() }
+    // ✅ 1. Definir la instancia de Firebase Storage
+    single { FirebaseStorage.getInstance() }
 
+
+    // 🔥 AUTH REPOSITORY
+    single<IAuthRepository> { AuthRepository(get()) } // Usa FirebaseAuth
+
+
+    // --- GitHub Module ---
     single<GithubService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
             .create(GithubService::class.java)
@@ -93,10 +119,35 @@ val appModule = module {
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
-    single<IProfileRepository> { ProfileRepository() }
-    factory { GetProfileUseCase(get()) }
-    viewModel { ProfileViewModel(get()) }
 
+    // --- PROFILE MODULE ---
+
+    // Repositorios
+    single<IProfileRepository> { ProfileRepository(get()) } // Usa FirebaseFirestore
+    single<IStorageRepository> { StorageRepositoryImpl(get()) } // Usa FirebaseStorage
+
+    // Use Cases
+    factory { GetProfileUseCase(get()) }
+    factory { SaveProfileUseCase(get()) }
+    factory { UpdateProfileUseCase(get()) }
+    factory { DeleteProfileUseCase(get()) }
+    factory { UploadAvatarUseCase(get()) }
+
+    // ViewModel
+    viewModel {
+        ProfileViewModel(
+            getProfileUseCase = get(),
+            saveProfileUseCase = get(),
+            updateProfileUseCase = get(),
+            deleteProfileUseCase = get(),
+            uploadAvatarUseCase = get(),
+            firebaseAuth = get() // Usa FirebaseAuth
+        )
+    }
+    // --- FIN PROFILE MODULE ---
+
+
+    // --- Dollar Module ---
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
@@ -106,6 +157,7 @@ val appModule = module {
     viewModel { DollarViewModel(get()) }
 
 
+    // --- Movie Module ---
     single(named("apiKey")) {
         androidApplication().getString(R.string.api_key)
     }
@@ -120,6 +172,8 @@ val appModule = module {
     factory { FetchPopularMoviesUseCase(get()) }
     viewModel { PopularMoviesViewModel(get()) }
 
+
+    // --- Onboarding Module ---
     single { OnboardingDataStore(get<android.content.Context>()) }
 
     single<IOnboardingRepository> {

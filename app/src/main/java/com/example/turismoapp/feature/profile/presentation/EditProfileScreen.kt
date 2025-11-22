@@ -1,5 +1,8 @@
 package com.example.turismoapp.feature.profile.presentation
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,126 +20,269 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.turismoapp.feature.profile.domain.model.ProfileModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    onBack: () -> Unit = {},
-    onSave: (String, String, String, String) -> Unit = { _, _, _, _ -> }
+    profileViewModel: ProfileViewModel = koinViewModel(),
+    onBack: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var summary by remember { mutableStateOf("") }
+    val state by profileViewModel.state.collectAsState()
+    val isSaving = remember { mutableStateOf(false) }
+    val showSuccessDialog = remember { mutableStateOf(false) }
 
-    var avatarUrl by remember {
-        mutableStateOf("https://cdn-icons-png.flaticon.com/512/149/149071.png")
+    // Carga inicial: Asegura que el perfil se cargue al entrar a la pantalla
+    LaunchedEffect(Unit) {
+        profileViewModel.loadProfile()
     }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = { Text("Editar Perfil") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Atrás")
                     }
                 }
             )
         }
     ) { padding ->
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Spacer(Modifier.height(20.dp))
-
-            // FOTO DE PERFIL
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, Color.LightGray, CircleShape)
-                    .clickable {
-                        // Aquí podrías abrir un selector de imágenes
-                    },
-                contentScale = ContentScale.Crop
-            )
-
-            Text(
-                "Cambiar foto",
-                color = Color(0xFF9C27B0),
-                modifier = Modifier.clickable { },
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(Modifier.height(28.dp))
-
-            // CAMPOS DE TEXTO
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nombre completo") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Correo electrónico") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = email.isNotBlank() && !email.contains("@"),
-                supportingText = {
-                    if (email.isNotBlank() && !email.contains("@"))
-                        Text("Email inválido", color = Color.Red)
+        when (state) {
+            is ProfileViewModel.ProfileUiState.Loading,
+            ProfileViewModel.ProfileUiState.Init -> {
+                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
+            }
+            is ProfileViewModel.ProfileUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text(
+                        "Error al cargar/guardar: ${(state as ProfileViewModel.ProfileUiState.Error).message}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(24.dp)
+                    )
+                }
+            }
+            is ProfileViewModel.ProfileUiState.Success -> {
+                // Solo renderizamos si el perfil se cargó correctamente
+                EditProfileForm(
+                    padding = padding,
+                    profile = (state as ProfileViewModel.ProfileUiState.Success).profile,
+                    viewModel = profileViewModel,
+                    isSaving = isSaving,
+                    showSuccessDialog = showSuccessDialog,
+                    onBack = onBack
+                )
+            }
+            else -> {}
+        }
+    }
+
+    // Diálogo de éxito (se muestra sobre el Scaffold)
+    if (showSuccessDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showSuccessDialog.value = false
+                onBack()
+            },
+            title = { Text("¡Perfil actualizado!") },
+            text = { Text("Tus cambios se han guardado correctamente.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSuccessDialog.value = false
+                    onBack()
+                }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+}
+
+// Sub-Composable para la lógica de la forma de edición
+@Composable
+private fun EditProfileForm(
+    padding: PaddingValues,
+    profile: ProfileModel,
+    viewModel: ProfileViewModel,
+    isSaving: MutableState<Boolean>,
+    showSuccessDialog: MutableState<Boolean>,
+    onBack: () -> Unit
+) {
+    // 1. Estados locales para los campos, NO inicializados aquí
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var summary by remember { mutableStateOf("") }
+    var avatarUrl by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val isInitialized = remember { mutableStateOf(false) } // Bandera para inicialización
+
+    val state by viewModel.state.collectAsState()
+
+    // 2. SINCRONIZACIÓN DE ESTADOS (Solo se ejecuta si el perfil cambia)
+    LaunchedEffect(profile) {
+        // Solo inicializamos los estados locales si no se han cargado antes
+        if (!isInitialized.value) {
+            name = profile.name
+            email = profile.email // Email cargado desde el ProfileModel
+            phone = profile.cellphone
+            summary = profile.summary
+            avatarUrl = profile.pathUrl
+            isInitialized.value = true
+        }
+    }
+
+    // Observar el estado de guardado
+    LaunchedEffect(state) {
+        if (state is ProfileViewModel.ProfileUiState.Success) {
+            if (isSaving.value) {
+                isSaving.value = false
+                showSuccessDialog.value = true
+            }
+        }
+        if (state is ProfileViewModel.ProfileUiState.Error) {
+            isSaving.value = false
+        }
+    }
+
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        selectedImageUri = uri
+        if (uri != null) {
+            viewModel.uploadNewAvatar(uri)
+            isSaving.value = true
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // ... (Resto del código de la UI es idéntico a la versión anterior)
+
+        // 📸 Sección de Avatar
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                .clickable { imagePickerLauncher.launch("image/*") }
+        ) {
+            val imageSource = selectedImageUri ?: if (avatarUrl.isNotEmpty()) avatarUrl else "https://placehold.co/100x100/9C27B0/ffffff?text=AV"
+            AsyncImage(
+                model = imageSource,
+                contentDescription = "Avatar de Usuario",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
-
-            Spacer(Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text("Teléfono") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            OutlinedTextField(
-                value = summary,
-                onValueChange = { summary = it },
-                label = { Text("Descripción") },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 5
-            )
-
-            Spacer(Modifier.height(28.dp))
-
-            // BOTÓN GUARDAR
-            Button(
-                onClick = { onSave(name, email, phone, summary) },
+            Text(
+                "Cambiar",
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9C27B0)),
-                enabled = name.isNotBlank() && email.contains("@")
-            ) {
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .padding(vertical = 4.dp),
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        // 📝 Campos de Edición
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre Completo") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSaving.value
+        )
+        Spacer(Modifier.height(16.dp))
+
+        // Campo de Email (Solo Lectura)
+        OutlinedTextField(
+            value = email, // Ahora toma el valor del estado local sincronizado
+            onValueChange = { /* No permitir cambiar el email */ },
+            label = { Text("Correo Electrónico (No editable)") },
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledLabelColor = Color.Gray,
+                disabledTextColor = Color.DarkGray,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+            )
+        )
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Número de Teléfono") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSaving.value
+        )
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = summary,
+            onValueChange = { summary = it },
+            label = { Text("Breve Biografía/Resumen") },
+            singleLine = false,
+            maxLines = 4,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSaving.value
+        )
+        Spacer(Modifier.height(32.dp))
+
+        // 💾 Botón de Guardar
+        Button(
+            onClick = {
+                if (!isSaving.value && state is ProfileViewModel.ProfileUiState.Success) {
+                    // 1. Marcar como guardando
+                    isSaving.value = true
+                    // 2. Llamar al ViewModel con los datos locales
+                    // Pasamos el email local, que contiene el email de Auth
+                    viewModel.updateProfile(name, email, phone, summary)
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            enabled = !isSaving.value && state is ProfileViewModel.ProfileUiState.Success, // Deshabilitar si no está en estado Success
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            if (isSaving.value) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = Color.White
+                )
+            } else {
                 Text(
                     "Guardar cambios",
                     color = Color.White,
                     style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                 )
             }
+        }
+
+        // Mostrar errores
+        if (state is ProfileViewModel.ProfileUiState.Error) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Error: ${(state as ProfileViewModel.ProfileUiState.Error).message}",
+                color = Color.Red,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }
