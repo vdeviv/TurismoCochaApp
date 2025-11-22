@@ -8,6 +8,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -17,6 +18,7 @@ import androidx.navigation.navArgument
 
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
+import com.example.turismoapp.feature.login.data.repository.GoogleSignInHelper
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.login.presentation.RegisterScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
