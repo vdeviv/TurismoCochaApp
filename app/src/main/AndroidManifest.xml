@@ -23,7 +23,7 @@
         <!-- GOOGLE MAPS API KEY (ESTO DEBE IR AQUI ADENTRO SÍ O SÍ) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AQUI_TU_API_KEY" />
+            android:value="AIzaSyAwROBRy75yQ8NLGcSKCuHvmz9i9aG0sGA" />
 
         <!-- ACTIVIDAD PRINCIPAL -->
         <activity
@@ -45,6 +45,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}"/>
 
     </application>
 
