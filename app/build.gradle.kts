@@ -1,3 +1,12 @@
+import java.util.Properties
+
+// Cargar propiedades locales
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,12 +21,13 @@ android {
 
     defaultConfig {
         applicationId = "com.example.turismoapp"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -80,6 +90,16 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
 
 
+    // Maps Compose
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    // Optional: Utilities for clustering, etc.
+    implementation("com.google.maps.android:maps-compose-utils:4.3.3")
+    // Optional: Widgets like ScaleBar
+    implementation("com.google.maps.android:maps-compose-widgets:4.3.3")
+    //LOCALIZACION
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")

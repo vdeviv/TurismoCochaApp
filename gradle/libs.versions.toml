@@ -20,7 +20,7 @@ mockk = "1.13.8"
 navcompose = "2.9.3"
 retrofit = "3.0.0"
 koin = "4.1.1"
-ksp = "2.0.20-1.0.24"
+ksp = "2.0.21-1.0.26"
 room = "2.8.0"
 
 lifecycleViewModelCompose = "2.5.1"
@@ -108,3 +108,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref="ksp"}
 local = ["room-runtime", "room-ktx", "room-rxjava2", "room-rxjava3", "room-guava", "room-paging" ]
 # ✅ Bundle para Firebase
 firebase = ["firebase-database", "firebase-messaging", "firebase-auth", "kotlinx-coroutines-play-services"]
+

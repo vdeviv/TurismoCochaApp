@@ -20,16 +20,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
-        <!-- GOOGLE MAPS API KEY (ESTO DEBE IR AQUI ADENTRO SÍ O SÍ) -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAwROBRy75yQ8NLGcSKCuHvmz9i9aG0sGA" />
-
-        <!-- ACTIVIDAD PRINCIPAL -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.TurismoApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -52,3 +45,4 @@
     </application>
 
 </manifest>
+
