@@ -62,8 +62,8 @@ dependencies {
 
     // --- CORE ANDROIDX ---
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx) // Usa la versión de libs.versions.toml (2.9.3)
+    implementation(libs.androidx.activity.compose)      // Usa la versión de libs.versions.toml (1.9.0)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -79,27 +79,15 @@ dependencies {
 
     // --- FIREBASE ---
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.messaging)
-    implementation(libs.firebase.auth)
-    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.bundles.firebase)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
 
     // --- GOOGLE SIGN-IN ---
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation ("com.google.maps.android:maps-compose:2.11.4")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
 
-
-    // Maps Compose
-    implementation("com.google.maps.android:maps-compose:4.3.3")
-    // Optional: Utilities for clustering, etc.
-    implementation("com.google.maps.android:maps-compose-utils:4.3.3")
-    // Optional: Widgets like ScaleBar
-    implementation("com.google.maps.android:maps-compose-widgets:4.3.3")
-    //LOCALIZACION
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     // --- RETROFIT (HTTP CLIENT) ---
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -109,11 +97,12 @@ dependencies {
     // --- COIL (IMÁGENES EN COMPOSE) ---
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // --- LIFECYCLE / VIEWMODEL COMPOSE ---
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
+    // --- LIFECYCLE / VIEWMODEL COMPOSE (SOLO DEJAMOS LAS VERSIONES CORRECTAS Y CONSISTENTES) ---
+    // Estas líneas fueron eliminadas/comentadas:
+    // implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
+    // implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    // Ahora usamos las referencias de libs que apuntan a activityCompose=1.9.0 y lifecycleRuntimeKtx=2.9.3
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // Usará 2.5.1 de la sección [versions]
 
     // --- NAVIGATION COMPOSE ---
     implementation(libs.androidx.navigation.compose)
@@ -126,6 +115,8 @@ dependencies {
 
     // --- ROOM (BASE DE DATOS LOCAL) ---
     implementation(libs.bundles.local)
+    implementation(libs.firebase.firestore.ktx)
+    implementation("com.google.firebase:firebase-storage-ktx")
     ksp(libs.room.compiler)
     testImplementation(libs.room.testing)
 
@@ -145,5 +136,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }

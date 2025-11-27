@@ -1,128 +1,238 @@
 package com.example.turismoapp.feature.profile.presentation
 
-
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.turismoapp.feature.profile.domain.model.ProfileModel
 import org.koin.androidx.compose.koinViewModel
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel(),
-    onBack: () -> Unit = {},
-    onEditProfile: () -> Unit = {},
-
-    onFavorites: () -> Unit = {},
-    onTrips: () -> Unit = {},
-    onSettings: () -> Unit = {},
-    onLanguage: () -> Unit = {},
-
+    onEditProfileClick: () -> Unit,
+    onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
 ) {
-    val state = profileViewModel.state.collectAsState()
+    // 1. Recoger el estado del ViewModel
+    val state by profileViewModel.state.collectAsState()
 
+    // 2. Cargar el perfil al inicio (Solo se ejecuta una vez)
     LaunchedEffect(Unit) {
-        profileViewModel.showProfile()
+        profileViewModel.loadProfile()
+    }
+
+    // Manejar el cierre de sesión/eliminación de cuenta
+    LaunchedEffect(state) {
+        if (state is ProfileViewModel.ProfileUiState.Deleted) {
+            onDeleteAccount()
+        }
+        // Si signOut es exitoso, también debería haber una navegación
+        // que observe el estado de FirebaseAuth en el Activity principal.
     }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Perfil") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onEditProfile) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar")
-                    }
-                }
+                title = { Text("Mi Perfil") }
             )
         }
     ) { padding ->
 
-        when (val st = state.value) {
-
-            ProfileViewModel.ProfileUiState.Loading ->
+        // 3. Manejar los diferentes estados de la UI
+        when (state) {
+            is ProfileViewModel.ProfileUiState.Loading,
+            is ProfileViewModel.ProfileUiState.Init -> {
                 LoadingView(padding)
-
-            is ProfileViewModel.ProfileUiState.Error ->
-                ErrorView(padding, st.message)
-
-            is ProfileViewModel.ProfileUiState.Success -> {
-                val profile = st.profile
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Spacer(Modifier.height(20.dp))
-
-                    AsyncImage(
-                        model = profile.pathUrl.ifBlank { "https://cdn-icons-png.flaticon.com/512/149/149071.png" },
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFF1F1F1), CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Text(
-                        text = profile.name,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = profile.email,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
-                    )
-
-                    Spacer(Modifier.height(24.dp))
-
-                    StatsCard()
-
-                    Spacer(Modifier.height(24.dp))
-
-                    MenuOption("Editar perfil", Icons.Default.Edit, onEditProfile)
-                    MenuOption("Favoritos", Icons.Outlined.FavoriteBorder, onFavorites)
-                    MenuOption("Viajes previos", Icons.Outlined.History, onTrips)
-                    MenuOption("Ajustes", Icons.Outlined.Settings, onSettings)
-                    MenuOption("Idioma", Icons.Outlined.Language, onLanguage)
-                }
             }
+            is ProfileViewModel.ProfileUiState.Error -> {
+                val message = (state as ProfileViewModel.ProfileUiState.Error).message
+                ErrorView(padding, message, profileViewModel::loadProfile)
+            }
+            is ProfileViewModel.ProfileUiState.Deleted -> {
+                // Ya manejado en el LaunchedEffect
+            }
+            is ProfileViewModel.ProfileUiState.Success -> {
+                val profile = (state as ProfileViewModel.ProfileUiState.Success).profile
+                SuccessView(
+                    padding = padding,
+                    profile = profile,
+                    onEditProfileClick = onEditProfileClick,
+                    onSignOut = profileViewModel::signOut, // Llama a la función del ViewModel
+                    onDeleteAccount = profileViewModel::deleteAccount // Llama a la función del ViewModel
+                )
+            }
+        }
+    }
+}
 
-            else -> {}
+// ----------------------------------------------------
+// Componentes Reutilizables de la UI
+// ----------------------------------------------------
+
+@Composable
+private fun SuccessView(
+    padding: PaddingValues,
+    profile: ProfileModel,
+    onEditProfileClick: () -> Unit,
+    onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .padding(horizontal = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(20.dp))
+
+        // 🖼️ FOTO DE PERFIL
+        AsyncImage(
+            model = profile.pathUrl,
+            contentDescription = "Foto de perfil",
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .border(2.dp, Color.LightGray, CircleShape),
+            contentScale = ContentScale.Crop
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // 👤 NOMBRE Y EMAIL
+        Text(
+            profile.name.ifEmpty { "Viajero Anónimo" },
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            profile.email,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+
+        // 📝 Resumen / Descripción
+        if (profile.summary.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                profile.summary,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+
+        Spacer(Modifier.height(28.dp))
+
+        // 📊 ESTADÍSTICAS (Placeholder)
+        StatsCard()
+
+        Spacer(Modifier.height(28.dp))
+
+        // 📋 MENÚ DE OPCIONES
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text("General", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Spacer(Modifier.height(8.dp))
+
+            MenuOption(
+                title = "Editar Perfil",
+                icon = Icons.Outlined.Person,
+                onClick = onEditProfileClick
+            )
+            MenuOption(
+                title = "Mis Viajes",
+                icon = Icons.Outlined.Place,
+                onClick = { /* TODO: Navegar a Mis Viajes */ }
+            )
+            MenuOption(
+                title = "Lista de Deseos",
+                icon = Icons.Outlined.FavoriteBorder,
+                onClick = { /* TODO: Navegar a Lista de Deseos */ }
+            )
+
+            // Opciones de cuenta
+            Spacer(Modifier.height(16.dp))
+            Text("Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Spacer(Modifier.height(8.dp))
+
+            MenuOption(
+                title = "Cerrar Sesión",
+                icon = Icons.Outlined.ExitToApp,
+                onClick = onSignOut
+            )
+            MenuOption(
+                title = "Eliminar Cuenta",
+                icon = Icons.Outlined.Delete,
+                isDestructive = true,
+                onClick = onDeleteAccount
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatsCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            StatItem(value = "10", label = "Viajes")
+            StatItem(value = "45", label = "Favoritos")
+            StatItem(value = "9", label = "Reseñas")
+        }
+    }
+}
+
+@Composable
+private fun StatItem(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+    }
+}
+
+@Composable
+private fun MenuOption(title: String, icon: ImageVector, onClick: () -> Unit, isDestructive: Boolean = false) {
+    val color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = null, tint = color)
+        Spacer(Modifier.width(16.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = color,
+            modifier = Modifier.weight(1f)
+        )
+        if (!isDestructive) {
+            Icon(Icons.Outlined.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
         }
     }
 }
@@ -140,79 +250,21 @@ private fun LoadingView(padding: PaddingValues) {
 }
 
 @Composable
-private fun ErrorView(padding: PaddingValues, message: String) {
-    Box(
+private fun ErrorView(padding: PaddingValues, message: String, onRetry: () -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding),
-        contentAlignment = Alignment.Center
+            .padding(padding)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text("Error: $message", color = Color.Red)
-    }
-}
-
-@Composable
-private fun StatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7))
-    ) {
-        Row(
-            modifier = Modifier.padding(vertical = 18.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Stat("Puntos de viaje", "360")
-            VerticalDivider()
-            Stat("Viajes", "238")
-            VerticalDivider()
-            Stat("Lista de deseos", "473")
+        Text("Error al cargar el perfil", style = MaterialTheme.typography.titleLarge, color = Color.Red)
+        Spacer(Modifier.height(8.dp))
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) {
+            Text("Reintentar")
         }
-    }
-}
-
-@Composable
-private fun Stat(title: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            value,
-            color = Color(0xFF9C27B0),
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(title, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-private fun VerticalDivider() {
-    Divider(
-        modifier = Modifier
-            .height(45.dp)
-            .width(1.dp),
-        color = Color(0xFFE0E0E0)
-    )
-}
-
-@Composable
-private fun MenuOption(
-    title: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit
-) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, title, tint = Color(0x80111111))
-            Spacer(Modifier.width(16.dp))
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-        }
-
-        Divider(color = Color(0xFFEAEAEA))
     }
 }
