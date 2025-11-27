@@ -12,7 +12,7 @@ import com.example.turismoapp.Framework.local.entity.DestinationEntity
         DestinationEntity::class,
         CalendarEventEntity::class
     ],
-    version = 2,                    // 🔴 súbelo (antes estaba en 1)
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

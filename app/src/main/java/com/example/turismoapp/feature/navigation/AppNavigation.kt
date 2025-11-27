@@ -1,15 +1,28 @@
 package com.example.turismoapp.feature.navigation
 
+// ========== IMPORTS CORE ==========
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+// Navigation
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
+// Feature Screens
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
 import com.example.turismoapp.feature.login.presentation.LoginScreen
@@ -22,16 +35,22 @@ import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.search.presentation.SearchViewModel
 import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
 
-// 🔥 IMPORT CALENDARIO
-import com.example.turismoapp.feature.calendar.CalendarScreen
-import com.example.turismoapp.feature.calendar.CalendarViewModel
-import org.koin.androidx.compose.koinViewModel
+// Calendario
+import com.example.turismoapp.feature.calendar.presentation.CalendarScreen
+import com.example.turismoapp.feature.calendar.presentation.CalendarViewModel
+
+
+// ======================================================
+//                APP NAVIGATION SYSTEM
+// ======================================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
 
     val navController = rememberNavController()
+
+    // Search VM
     val searchVM: SearchViewModel = viewModel()
     val allPlaces by searchVM.allPlaces.collectAsState()
 
@@ -46,6 +65,7 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
+    // Rutas sin BottomBar
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -55,6 +75,9 @@ fun AppNavigation() {
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
+
+
+    // ==================== UI CONTAINERS ====================
 
     Scaffold(
         bottomBar = {
@@ -67,12 +90,15 @@ fun AppNavigation() {
         }
     ) { innerPadding ->
 
+        // ==================== NAVIGATION HOST ====================
+
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
 
+            // -------- SPLASH --------
             composable(Screen.Splash.route) {
                 SplashScreen(
                     onNavigateNext = {
@@ -83,6 +109,7 @@ fun AppNavigation() {
                 )
             }
 
+            // -------- ONBOARDING --------
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onSkip = {
@@ -98,6 +125,7 @@ fun AppNavigation() {
                 )
             }
 
+            // -------- LOGIN --------
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -105,12 +133,11 @@ fun AppNavigation() {
                             popUpTo(Screen.Login.route) { inclusive = true }
                         }
                     },
-                    onRegisterClick = {
-                        navController.navigate(Screen.Register.route)
-                    }
+                    onRegisterClick = { navController.navigate(Screen.Register.route) }
                 )
             }
 
+            // -------- REGISTER --------
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onRegistrationSuccess = {
@@ -124,6 +151,7 @@ fun AppNavigation() {
                 )
             }
 
+            // -------- HOME --------
             composable(Screen.Home.route) {
                 val vm: HomeViewModel = viewModel()
                 val state = vm.ui.collectAsStateWithLifecycle()
@@ -139,21 +167,27 @@ fun AppNavigation() {
                 )
             }
 
-            // 🔥 CALENDARIO REAL
+            // -------- CALENDARIO REAL --------
             composable(Screen.Calendar.route) {
-                val calendarVM: CalendarViewModel = koinViewModel()
+                val calendarVM: CalendarViewModel = viewModel()
+
                 CalendarScreen(
                     navController = navController,
                     viewModel = calendarVM
                 )
             }
 
-            composable(Screen.Packages.route) { Text("Paquetes") }
+            // -------- PACKAGES --------
+            composable(Screen.Packages.route) {
+                Text("Paquetes")
+            }
 
+            // -------- MOVIES --------
             composable(Screen.PopularMovies.route) {
                 PopularMoviesScreen()
             }
 
+            // -------- PROFILE --------
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onBack = { navController.popBackStack() },
@@ -165,6 +199,7 @@ fun AppNavigation() {
                 )
             }
 
+            // -------- EDIT PROFILE --------
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onBack = { navController.popBackStack() },
@@ -172,11 +207,13 @@ fun AppNavigation() {
                 )
             }
 
+            // -------- STATIC PAGES --------
             composable(Screen.Favorites.route) { Text("Favoritos") }
             composable(Screen.Trips.route) { Text("Mis Viajes") }
             composable(Screen.Settings.route) { Text("Configuración") }
             composable(Screen.Language.route) { Text("Idioma") }
 
+            // -------- DETAIL PLACE --------
             composable(
                 route = Screen.DetailPlace.route,
                 arguments = listOf(navArgument("placeId") { type = NavType.StringType })
@@ -194,7 +231,8 @@ fun AppNavigation() {
         }
     }
 
-    // 🔍 SEARCH BOTTOM SHEET
+    // ==================== SEARCH BOTTOM SHEET ====================
+
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },
