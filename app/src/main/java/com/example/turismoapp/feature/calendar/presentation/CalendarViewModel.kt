@@ -2,7 +2,9 @@ package com.example.turismoapp.feature.calendar.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.turismoapp.feature.calendar.domain.model.CalendarEvent
 import com.example.turismoapp.feature.calendar.domain.usecase.GetEventsByDateUseCase
+import com.example.turismoapp.feature.calendar.domain.usecase.InsertCalendarEventUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -10,7 +12,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 class CalendarViewModel(
-    private val getEventsByDate: GetEventsByDateUseCase
+    private val getEventsByDate: GetEventsByDateUseCase,
+    private val insertEvent: InsertCalendarEventUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalendarUiState())
@@ -26,6 +29,13 @@ class CalendarViewModel(
             isLoading = true
         )
         loadEventsForDate(date)
+    }
+
+    fun addEvent(event: CalendarEvent) {
+        viewModelScope.launch {
+            insertEvent(event)
+            loadEventsForDate(_uiState.value.selectedDate)
+        }
     }
 
     private fun loadEventsForDate(date: LocalDate) {
