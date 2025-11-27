@@ -12,7 +12,20 @@
           "package_name": "com.example.turismoapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "520083069036-jlfsdh5j5afhmb6eep7jh8topn0qa7ni.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.turismoapp",
+            "certificate_hash": "a96828449def7e143f39d85c6f9e9bf6eea73cd9"
+          }
+        },
+        {
+          "client_id": "520083069036-m15dnsl5md6ulhk11sftp9esif4p7094.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAsdTm1FxV4Q61_6Xi2HwznMk4q8W79xrk"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "520083069036-m15dnsl5md6ulhk11sftp9esif4p7094.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -3,10 +3,12 @@ package com.example.turismoapp.feature.login.data.repository
 import com.example.turismoapp.feature.login.domain.model.AuthUser
 import com.example.turismoapp.feature.login.domain.model.Result
 import com.example.turismoapp.feature.login.domain.repository.IAuthRepository
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
@@ -60,4 +62,32 @@ class AuthRepository(
             Result.Error(Exception(errorMessage))
         }
     }
+    fun getGoogleCredential(idToken: String): AuthCredential {
+        return GoogleAuthProvider.getCredential(idToken, null)
+    }
+
+    /**
+     * Inicia sesión en Firebase usando una credencial de Google.
+     */
+    suspend fun signInWithGoogleCredential(idToken: String): Result<AuthUser> {
+        return try {
+            val credential = getGoogleCredential(idToken)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val user = authResult.user
+
+            if (user != null) {
+                // El correo está automáticamente verificado por ser Google.
+                Result.Success(AuthUser(user.uid, user.email))
+            } else {
+                Result.Error(Exception("Error al autenticar con Google: usuario nulo."))
+            }
+        } catch (e: Exception) {
+            val errorMessage = when (e) {
+                // Puedes añadir manejo específico para errores de credenciales, etc.
+                else -> e.localizedMessage ?: "Error desconocido al iniciar sesión con Google."
+            }
+            Result.Error(Exception(errorMessage))
+        }
+    }
+
 }

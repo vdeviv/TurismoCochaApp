@@ -1,12 +1,11 @@
 package com.example.turismoapp.feature.profile.domain.usecase
 
-import com.example.turismoapp.feature.profile.domain.model.ProfileModel
 import com.example.turismoapp.feature.profile.domain.repository.IProfileRepository
 
-class GetProfileUseCase(
+class DeleteProfileUseCase(
     private val repository: IProfileRepository
 ) {
-    suspend fun invoke(uid: String): Result<ProfileModel> {
-        return repository.fetchProfile(uid)
+    suspend fun invoke(uid: String): Result<Unit> {
+        return repository.deleteProfile(uid)
     }
 }

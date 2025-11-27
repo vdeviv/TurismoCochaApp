@@ -16,5 +16,6 @@
     <string name="error_empty_response" translatable="false">No response received from the server.</string>
     <string name="error_unknown" translatable="false">An unexpected error occurred. Please try again.</string>
 
+    <string name="web_client_id">520083069036-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
     <string name="api_key" translatable="false">fa3e844ce31744388e07fa47c7c5d8c3</string>
 </resources>

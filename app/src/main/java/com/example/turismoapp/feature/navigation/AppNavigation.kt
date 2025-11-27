@@ -10,6 +10,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,6 +26,7 @@ import androidx.navigation.navArgument
 // Feature Screens
 import com.example.turismoapp.feature.home.HomeScreen
 import com.example.turismoapp.feature.home.HomeViewModel
+import com.example.turismoapp.feature.login.data.repository.GoogleSignInHelper
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.login.presentation.RegisterScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
@@ -190,20 +192,38 @@ fun AppNavigation() {
             // -------- PROFILE --------
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onBack = { navController.popBackStack() },
-                    onEditProfile = { navController.navigate(Screen.EditProfile.route) },
-                    onFavorites = { navController.navigate(Screen.Favorites.route) },
-                    onTrips = { navController.navigate(Screen.Trips.route) },
-                    onSettings = { navController.navigate(Screen.Settings.route) },
-                    onLanguage = { navController.navigate(Screen.Language.route) }
+                    // Navegación a la pantalla de edición
+                    onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
+
+                    // Redirección al Cerrar Sesión
+                    onSignOut = {
+                        // Lógica para navegar a la pantalla de Login después del cierre de sesión
+                        navController.navigate(Screen.Login.route) {
+                            // Esto limpia la pila de navegación para que el usuario no pueda volver al perfil
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    },
+
+                    // Redirección al Eliminar Cuenta
+                    onDeleteAccount = {
+                        // Lógica para navegar a la pantalla de Login después de la eliminación de cuenta
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                    }
                 )
             }
 
             // -------- EDIT PROFILE --------
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
-                    onBack = { navController.popBackStack() },
-                    onSave = { _, _, _, _ -> navController.popBackStack() }
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
 

@@ -9,4 +9,5 @@
     <string name="home_welcome_text">Welcome back %s!</string>
     <string name="gitalias_input">Enter the GitHub account</string>
     <string name="gitalias_btn_find">Find</string>
+    <string name="web_client_id">520083069036-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
 </resources>
