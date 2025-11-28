@@ -12,7 +12,7 @@ import com.example.turismoapp.Framework.local.entity.DestinationEntity
         DestinationEntity::class,
         CalendarEventEntity::class
     ],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

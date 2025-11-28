@@ -10,18 +10,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DestinationDao {
 
-    @Query("SELECT * FROM destinations ORDER BY name ASC")
+    @Query("SELECT * FROM destinations ORDER BY rating DESC")
     fun getAllDestinations(): Flow<List<DestinationEntity>>
 
     @Query("SELECT * FROM destinations WHERE id = :id LIMIT 1")
     suspend fun getDestinationById(id: Long): DestinationEntity?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDestinations(destinations: List<DestinationEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDestination(destination: DestinationEntity)
+    suspend fun insertAll(destinations: List<DestinationEntity>)
 
-    @Query("DELETE FROM destinations")
-    suspend fun clearDestinations()
 }

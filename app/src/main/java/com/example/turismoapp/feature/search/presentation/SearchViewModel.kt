@@ -3,39 +3,62 @@ package com.example.turismoapp.feature.search.presentation
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Room
 import com.example.turismoapp.Framework.dto.PlaceDto
+import com.example.turismoapp.Framework.local.db.AppDatabase
 import com.example.turismoapp.Framework.repository.BoliviaRemoteDataSource
 import com.example.turismoapp.Framework.repository.DestinationsRepository
 import com.example.turismoapp.Framework.service.RetrofitBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SearchViewModel(app: Application) : AndroidViewModel(app) {
 
+    private val db: AppDatabase by lazy {
+        Room.databaseBuilder(
+            app.applicationContext,
+            AppDatabase::class.java,
+            "turismo_database"
+        ).build()
+    }
+
+    private val localDao by lazy { db.destinationDao() }
+
     private val repo: DestinationsRepository by lazy {
         val rb = RetrofitBuilder(app.applicationContext)
-        DestinationsRepository(BoliviaRemoteDataSource(rb.boliviaService))
+        DestinationsRepository(
+            remote = BoliviaRemoteDataSource(rb.boliviaService),
+            localDao = localDao
+        )
     }
 
     private val _allPlaces = MutableStateFlow<List<PlaceDto>>(emptyList())
     val allPlaces: StateFlow<List<PlaceDto>> = _allPlaces
 
     init {
-        loadAllPlaces()
+        loadPlaces()
     }
 
-    private fun loadAllPlaces() {
+    private fun loadPlaces() {
         viewModelScope.launch {
             try {
-                val apiPlaces = repo.popularInCochabamba()
-                val localPlaces = getLocalPlaces()
+                // 1. Sincronizar red -> Room
+                repo.refreshPopularInCochabamba()
 
-                val combined = (apiPlaces + localPlaces).distinctBy { it.id }
+                // 2. Obtener datos locales desde Room
+                val localPlaces = repo.getPopularInCochabamba().first()
+
+                // 3. Combinar con tus lugares locales manuales
+                val combined = (localPlaces + getLocalPlaces()).distinctBy { it.name }
+
                 _allPlaces.value = combined
 
             } catch (e: Exception) {
-                _allPlaces.value = getLocalPlaces()
+                // Si hay error de red, cargar solo Room + locales
+                val cached = repo.getPopularInCochabamba().first()
+                _allPlaces.value = cached + getLocalPlaces()
             }
         }
     }
@@ -62,17 +85,6 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
             latitude = -17.374950,
             longitude = -66.164116
-        ),
-        PlaceDto(
-            id = "laguna_alalay",
-            name = "Laguna Alalay",
-            description = "Laguna natural en el corazón de la ciudad.",
-            city = "Cochabamba",
-            department = "Cochabamba",
-            rating = 4.5,
-            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2023/03/12/2023031220545699714.jpg",
-            latitude = -17.403204,
-            longitude = -66.145481
         )
     )
 }

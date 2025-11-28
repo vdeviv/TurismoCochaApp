@@ -1,9 +1,5 @@
 package com.example.turismoapp.Framework.dto
 
-data class PlaceResponseDto(
-    val data: List<PlaceDto>?
-)
-
 data class PlaceDto(
     val id: String = "",
     val name: String = "",

@@ -36,15 +36,19 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.turismoapp.Framework.dto.PlaceDto
 import com.example.turismoapp.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun HomeScreen(
-    state: HomeUiState,
+    state: HomeUiState, // El estado que viene de la observación
     onRetry: () -> Unit,
     onProfileClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onPlaceClick: (String) -> Unit
-) {
+    onPlaceClick: (String) -> Unit,
+    viewModel: HomeViewModel = viewModel()
+)
+{
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -159,7 +163,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 // ===========================================================
 //  CARD estilo Figma — versión final y corregida
