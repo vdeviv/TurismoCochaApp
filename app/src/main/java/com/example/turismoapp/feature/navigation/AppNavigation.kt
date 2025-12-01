@@ -1,7 +1,5 @@
 package com.example.turismoapp.feature.navigation
 
-// ========================== IMPORTS ==========================
-
 // Compose
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,16 +20,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
 // Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 // UI Screens
 import com.example.turismoapp.feature.splash.presentation.SplashScreen
 import com.example.turismoapp.feature.onboarding.presentation.OnboardingScreen
 import com.example.turismoapp.feature.login.presentation.LoginScreen
 import com.example.turismoapp.feature.login.presentation.RegisterScreen
-import com.example.turismoapp.feature.home.HomeScreen
-import com.example.turismoapp.feature.home.HomeViewModel
+import com.example.turismoapp.feature.home.presentation.HomeScreen
 import com.example.turismoapp.feature.movie.presentation.PopularMoviesScreen
 import com.example.turismoapp.feature.profile.presentation.EditProfileScreen
 import com.example.turismoapp.feature.profile.presentation.ProfileScreen
@@ -42,10 +39,8 @@ import com.example.turismoapp.feature.search.presentation.PlaceDetailScreen
 import com.example.turismoapp.feature.calendar.presentation.CalendarScreen
 import com.example.turismoapp.feature.calendar.presentation.CalendarViewModel
 
-// KOIN
+// Koin
 import org.koin.androidx.compose.koinViewModel
-
-import com.example.turismoapp.feature.navigation.BottomBar
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +64,7 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
-    // RUTAS QUE NO DEBEN MOSTRAR EL BOTTOM BAR
+    // RUTAS SIN BOTTOM BAR
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -81,8 +76,6 @@ fun AppNavigation() {
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
 
 
-    // ======================= SCAFFOLD =======================
-
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
@@ -93,8 +86,6 @@ fun AppNavigation() {
             }
         }
     ) { innerPadding ->
-
-        // ======================= NAV HOST =======================
 
         NavHost(
             navController = navController,
@@ -155,14 +146,9 @@ fun AppNavigation() {
                 )
             }
 
-            // ---------------- HOME ----------------
+            // ---------------- HOME (NUEVO) ----------------
             composable(Screen.Home.route) {
-                val vm: HomeViewModel = viewModel()
-                val state = vm.ui.collectAsStateWithLifecycle()
-
                 HomeScreen(
-                    state = state.value,
-                    onRetry = { vm.load() },
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
                     onNotificationClick = {},
                     onPlaceClick = { id ->
@@ -171,10 +157,9 @@ fun AppNavigation() {
                 )
             }
 
-            // ---------------- CALENDARIO (KOIN) ----------------
+            // ---------------- CALENDAR ----------------
             composable(Screen.Calendar.route) {
                 val calendarVM: CalendarViewModel = koinViewModel()
-
                 CalendarScreen(
                     navController = navController,
                     viewModel = calendarVM
@@ -210,7 +195,7 @@ fun AppNavigation() {
                 )
             }
 
-            // ---------------- STATIC ROUTES ----------------
+            // RUTAS SIMPLES
             composable(Screen.Favorites.route) { Text("Favoritos") }
             composable(Screen.Trips.route) { Text("Mis Viajes") }
             composable(Screen.Settings.route) { Text("Configuración") }
@@ -235,9 +220,7 @@ fun AppNavigation() {
         }
     }
 
-
-    // ======================= SEARCH SHEET =======================
-
+    // ---------- SEARCH PANEL ----------
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },
@@ -274,7 +257,7 @@ fun AppNavigation() {
                     ) {
                         Text(place.name, style = MaterialTheme.typography.titleSmall)
                         Text(place.city, style = MaterialTheme.typography.bodySmall)
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
 

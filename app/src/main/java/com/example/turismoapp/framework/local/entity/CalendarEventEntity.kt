@@ -1,4 +1,4 @@
-package com.example.turismoapp.Framework.local.entity
+package com.example.turismoapp.framework.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,6 +1,6 @@
 package com.example.turismoapp.feature.calendar.data.repository
-import com.example.turismoapp.Framework.local.dao.CalendarEventDao
-import com.example.turismoapp.Framework.local.entity.CalendarEventEntity
+import com.example.turismoapp.framework.local.dao.CalendarEventDao
+import com.example.turismoapp.framework.local.entity.CalendarEventEntity
 import com.example.turismoapp.feature.calendar.domain.model.CalendarEvent
 import com.example.turismoapp.feature.calendar.domain.repository.CalendarEventRepository
 import kotlinx.coroutines.flow.Flow

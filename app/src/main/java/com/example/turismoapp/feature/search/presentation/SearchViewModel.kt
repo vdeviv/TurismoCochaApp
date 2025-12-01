@@ -3,12 +3,10 @@ package com.example.turismoapp.feature.search.presentation
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
-import com.example.turismoapp.Framework.dto.PlaceDto
-import com.example.turismoapp.Framework.local.db.AppDatabase
-import com.example.turismoapp.Framework.repository.BoliviaRemoteDataSource
-import com.example.turismoapp.Framework.repository.DestinationsRepository
-import com.example.turismoapp.Framework.service.RetrofitBuilder
+import com.example.turismoapp.framework.dto.PlaceDto
+import com.example.turismoapp.framework.local.db.AppDatabase
+import com.example.turismoapp.feature.home.data.FirebaseHomeService
+import com.example.turismoapp.feature.home.data.HomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -17,20 +15,14 @@ import kotlinx.coroutines.launch
 class SearchViewModel(app: Application) : AndroidViewModel(app) {
 
     private val db: AppDatabase by lazy {
-        Room.databaseBuilder(
-            app.applicationContext,
-            AppDatabase::class.java,
-            "turismo_database"
-        ).build()
+        AppDatabase.getInstance(app.applicationContext)
     }
 
-    private val localDao by lazy { db.destinationDao() }
-
-    private val repo: DestinationsRepository by lazy {
-        val rb = RetrofitBuilder(app.applicationContext)
-        DestinationsRepository(
-            remote = BoliviaRemoteDataSource(rb.boliviaService),
-            localDao = localDao
+    // Usamos el mismo HomeRepository que HomeScreen
+    private val repo by lazy {
+        HomeRepository(
+            firebase = FirebaseHomeService(),
+            db = db
         )
     }
 
@@ -44,20 +36,18 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadPlaces() {
         viewModelScope.launch {
             try {
-                // 1. Sincronizar red -> Room
-                repo.refreshPopularInCochabamba()
+                // 1. Firebase + Room híbrido
+                val firebaseAndLocal = repo.getHomePlaces()
 
-                // 2. Obtener datos locales desde Room
-                val localPlaces = repo.getPopularInCochabamba().first()
+                // 2. Añadimos lugares estáticos/mocks si quieres
+                val finalList = (firebaseAndLocal + getLocalPlaces())
+                    .distinctBy { it.id }
 
-                // 3. Combinar con tus lugares locales manuales
-                val combined = (localPlaces + getLocalPlaces()).distinctBy { it.name }
-
-                _allPlaces.value = combined
+                _allPlaces.value = finalList
 
             } catch (e: Exception) {
-                // Si hay error de red, cargar solo Room + locales
-                val cached = repo.getPopularInCochabamba().first()
+                // Si Firebase falla → solo Room + locales
+                val cached = repo.getHomePlaces()
                 _allPlaces.value = cached + getLocalPlaces()
             }
         }
@@ -70,8 +60,8 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             description = "Estatua monumental...",
             city = "Cochabamba",
             department = "Cochabamba",
-            rating = 4.8,
-            image = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg",
+            rating = "4.8",
+            imageUrl = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg",
             latitude = -17.376000,
             longitude = -66.156818
         ),
@@ -81,8 +71,8 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             description = "Mansión de estilo francés...",
             city = "Cochabamba",
             department = "Cochabamba",
-            rating = 4.6,
-            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
+            rating = "4.6",
+            imageUrl = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
             latitude = -17.374950,
             longitude = -66.164116
         )

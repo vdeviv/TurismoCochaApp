@@ -1,10 +1,10 @@
-package com.example.turismoapp.Framework.local.dao
+package com.example.turismoapp.framework.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.turismoapp.Framework.local.entity.CalendarEventEntity
+import com.example.turismoapp.framework.local.entity.CalendarEventEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao

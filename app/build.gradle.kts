@@ -1,6 +1,5 @@
 import java.util.Properties
 
-// Cargar propiedades locales
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -54,7 +53,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
 
@@ -98,10 +97,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.6.0")
 
     // --- LIFECYCLE / VIEWMODEL COMPOSE (SOLO DEJAMOS LAS VERSIONES CORRECTAS Y CONSISTENTES) ---
-    // Estas líneas fueron eliminadas/comentadas:
-    // implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
-    // implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    // Ahora usamos las referencias de libs que apuntan a activityCompose=1.9.0 y lifecycleRuntimeKtx=2.9.3
     implementation(libs.androidx.lifecycle.viewmodel.compose) // Usará 2.5.1 de la sección [versions]
 
     // --- NAVIGATION COMPOSE ---

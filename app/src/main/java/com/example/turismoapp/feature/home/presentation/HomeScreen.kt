@@ -1,5 +1,6 @@
-package com.example.turismoapp.feature.home
+package com.example.turismoapp.feature.home.presentation
 
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,43 +13,58 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import com.example.turismoapp.Framework.dto.PlaceDto
-import com.example.turismoapp.R
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
+import coil.compose.AsyncImage
+import com.example.turismoapp.framework.dto.PlaceDto
+import com.example.turismoapp.R
+import com.example.turismoapp.feature.home.viewmodel.HomeUiState
+import com.example.turismoapp.feature.home.viewmodel.HomeViewModel
+import com.example.turismoapp.feature.home.viewmodel.HomeViewModelFactory
 
 @Composable
 fun HomeScreen(
-    state: HomeUiState, // El estado que viene de la observación
-    onRetry: () -> Unit,
     onProfileClick: () -> Unit,
     onNotificationClick: () -> Unit,
     onPlaceClick: (String) -> Unit,
-    viewModel: HomeViewModel = viewModel()
-)
-{
+) {
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val factory = remember { HomeViewModelFactory(application) }
+    val viewModel: HomeViewModel = viewModel(factory = factory)
+
+    val state by viewModel.ui.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.refresh()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,7 +95,9 @@ fun HomeScreen(
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text = "Jairo Montaño",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
 
@@ -93,7 +111,7 @@ fun HomeScreen(
             }
         }
 
-        // ---------- Título ----------
+        // ---------- TITULOS ----------
         Text(
             text = "Explora la hermosa",
             style = MaterialTheme.typography.titleLarge.copy(
@@ -116,7 +134,7 @@ fun HomeScreen(
                 .padding(top = 6.dp, bottom = 24.dp)
         )
 
-        // ---------- Mejores destinos ----------
+        // ---------- SUBTITULO ----------
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,7 +142,9 @@ fun HomeScreen(
         ) {
             Text(
                 "Los mejores destinos",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
             )
             Text(
                 "Ver más",
@@ -135,24 +155,38 @@ fun HomeScreen(
 
         Spacer(Modifier.height(12.dp))
 
+        // ---------- ESTADOS ----------
         when (state) {
-            is HomeUiState.Loading -> Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator() }
 
-            is HomeUiState.Error -> Column(
-                Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(state.message, color = Color.Red)
-                Button(onClick = onRetry) { Text("Reintentar") }
+            is HomeUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+            }
+
+            is HomeUiState.Error -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = (state as HomeUiState.Error).message,
+                        color = Color.Red
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = { viewModel.refresh() }) {
+                        Text("Reintentar")
+                    }
+                }
             }
 
             is HomeUiState.Success -> {
+                val places = (state as HomeUiState.Success).places
+
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    items(state.places) { place ->
+                    items(places) { place ->
                         DestinationCard(
                             place = place,
                             onClick = { onPlaceClick(place.id) }
@@ -164,27 +198,23 @@ fun HomeScreen(
     }
 }
 
-// ===========================================================
-//  CARD estilo Figma — versión final y corregida
-// ===========================================================
 @Composable
 fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
-    var isBookmarked by remember { mutableStateOf(false) }
+    val isBookmarked = remember { mutableStateOf(false) }
 
     Card(
         shape = RoundedCornerShape(24.dp),
         modifier = Modifier
-            .width(280.dp)     // ancho exacto según Figma
-            .height(380.dp)    // alto ideal para pantallas reales
+            .width(280.dp)
+            .height(380.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(6.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box {
             Column {
 
-                // Imagen grande, como Figma
                 AsyncImage(
-                    model = place.image,
+                    model = place.imageUrl,
                     contentDescription = place.name,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -228,7 +258,7 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                             Text("⭐", fontSize = 14.sp)
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                "%.1f".format(place.rating),
+                                "%.1f".format(place.rating.toDoubleOrNull() ?: 0.0),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFF6F00)
                             )
@@ -237,9 +267,8 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                 }
             }
 
-            // Bookmark button
             IconButton(
-                onClick = { isBookmarked = !isBookmarked },
+                onClick = { isBookmarked.value = !isBookmarked.value },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(12.dp)
@@ -247,12 +276,9 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                     .background(Color.White.copy(alpha = 0.9f), CircleShape)
             ) {
                 Icon(
-                    imageVector = if (isBookmarked)
-                        Icons.Default.Bookmark
-                    else
-                        Icons.Default.BookmarkBorder,
+                    imageVector = if (isBookmarked.value) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                     contentDescription = "Bookmark",
-                    tint = if (isBookmarked) Color(0xFFD32F2F) else Color.Gray
+                    tint = if (isBookmarked.value) Color(0xFFD32F2F) else Color.Gray
                 )
             }
         }
