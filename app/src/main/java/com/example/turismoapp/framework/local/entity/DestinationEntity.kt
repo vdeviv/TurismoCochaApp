@@ -8,7 +8,7 @@ data class DestinationEntity(
     @PrimaryKey val id: String,
     val name: String,
     val description: String,
-    val rating: String,
+    val rating: Double,
     val city: String,
     val department: String,
     val imageUrl: String,

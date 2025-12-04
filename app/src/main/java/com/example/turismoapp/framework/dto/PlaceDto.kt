@@ -6,7 +6,7 @@ data class PlaceDto(
     val id: String = "",
     val name: String = "",
     val description: String = "",
-    val rating: String = "",
+    val rating: Double = 0.0,
     val city: String = "",
     val department: String = "",
     @get:PropertyName("imageUrl")

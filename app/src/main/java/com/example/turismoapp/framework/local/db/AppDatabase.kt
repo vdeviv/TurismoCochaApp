@@ -14,13 +14,13 @@ import com.example.turismoapp.framework.local.entity.DestinationEntity
         DestinationEntity::class,
         CalendarEventEntity::class
     ],
-    version = 1,
+    version = 2, // ✅ Cambiar de 1 a 2
     exportSchema = false
 )
-
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun destinationDao(): DestinationDao
+    abstract fun calendarEventDao(): CalendarEventDao // Si lo tienes
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
@@ -31,7 +31,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "turismo.db"
-                ).build().also { INSTANCE = it }
+                )
+                    .fallbackToDestructiveMigration() // ✅ Agregar esto para borrar y recrear la DB
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }

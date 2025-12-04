@@ -60,7 +60,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             description = "Estatua monumental...",
             city = "Cochabamba",
             department = "Cochabamba",
-            rating = "4.8",
+            rating = 4.8,
             imageUrl = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg",
             latitude = -17.376000,
             longitude = -66.156818
@@ -71,7 +71,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             description = "Mansión de estilo francés...",
             city = "Cochabamba",
             department = "Cochabamba",
-            rating = "4.6",
+            rating = 4.6,
             imageUrl = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
             latitude = -17.374950,
             longitude = -66.164116

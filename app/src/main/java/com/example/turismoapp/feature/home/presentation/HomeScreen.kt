@@ -42,11 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.example.turismoapp.framework.dto.PlaceDto
 import com.example.turismoapp.R
 import com.example.turismoapp.feature.home.viewmodel.HomeUiState
 import com.example.turismoapp.feature.home.viewmodel.HomeViewModel
 import com.example.turismoapp.feature.home.viewmodel.HomeViewModelFactory
+import com.example.turismoapp.framework.dto.PlaceDto
+
 
 @Composable
 fun HomeScreen(
@@ -257,8 +258,9 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                         ) {
                             Text("⭐", fontSize = 14.sp)
                             Spacer(Modifier.width(6.dp))
+                            // En la función DestinationCard, busca esta línea:
                             Text(
-                                "%.1f".format(place.rating.toDoubleOrNull() ?: 0.0),
+                                "%.1f".format(place.rating),
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFF6F00)
                             )
