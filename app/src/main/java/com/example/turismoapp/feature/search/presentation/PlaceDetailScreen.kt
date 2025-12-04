@@ -4,23 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.turismoapp.Framework.dto.PlaceDto
+import com.example.turismoapp.framework.dto.PlaceDto
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.CameraPositionState
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.CameraPosition
 
@@ -47,7 +45,7 @@ fun PlaceDetailScreen(
                 .height(270.dp)
         ) {
             AsyncImage(
-                model = place.image,
+                model = place.imageUrl,
                 contentDescription = place.name,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -61,7 +59,7 @@ fun PlaceDetailScreen(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         }
 

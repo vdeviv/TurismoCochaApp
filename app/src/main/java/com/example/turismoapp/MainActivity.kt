@@ -13,17 +13,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
 
+        try {
+            FirebaseApp.initializeApp(this)
+            Log.d("Firebase", " Firebase inicializado correctamente")
+        } catch (e: Exception) {
+            Log.e("Firebase", " Error al inicializar Firebase: ${e.message}")
+        }
+
+        setContent {
             TurismoAppTheme(darkTheme = false, dynamicColor = false) {
                 AppNavigation()
             }
-        }
-        try {
-            FirebaseApp.initializeApp(this)
-            Log.d("Firebase", "Firebase inicializado correctamente")
-        } catch (e: Exception) {
-            Log.e("Firebase", "Error al inicializar Firebase: ${e.message}")
         }
     }
 }

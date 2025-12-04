@@ -3,39 +3,52 @@ package com.example.turismoapp.feature.search.presentation
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.turismoapp.Framework.dto.PlaceDto
-import com.example.turismoapp.Framework.repository.BoliviaRemoteDataSource
-import com.example.turismoapp.Framework.repository.DestinationsRepository
-import com.example.turismoapp.Framework.service.RetrofitBuilder
+import com.example.turismoapp.framework.dto.PlaceDto
+import com.example.turismoapp.framework.local.db.AppDatabase
+import com.example.turismoapp.feature.home.data.FirebaseHomeService
+import com.example.turismoapp.feature.home.data.HomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SearchViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val repo: DestinationsRepository by lazy {
-        val rb = RetrofitBuilder(app.applicationContext)
-        DestinationsRepository(BoliviaRemoteDataSource(rb.boliviaService))
+    private val db: AppDatabase by lazy {
+        AppDatabase.getInstance(app.applicationContext)
+    }
+
+    // Usamos el mismo HomeRepository que HomeScreen
+    private val repo by lazy {
+        HomeRepository(
+            firebase = FirebaseHomeService(),
+            db = db
+        )
     }
 
     private val _allPlaces = MutableStateFlow<List<PlaceDto>>(emptyList())
     val allPlaces: StateFlow<List<PlaceDto>> = _allPlaces
 
     init {
-        loadAllPlaces()
+        loadPlaces()
     }
 
-    private fun loadAllPlaces() {
+    private fun loadPlaces() {
         viewModelScope.launch {
             try {
-                val apiPlaces = repo.popularInCochabamba()
-                val localPlaces = getLocalPlaces()
+                // 1. Firebase + Room híbrido
+                val firebaseAndLocal = repo.getHomePlaces()
 
-                val combined = (apiPlaces + localPlaces).distinctBy { it.id }
-                _allPlaces.value = combined
+                // 2. Añadimos lugares estáticos/mocks si quieres
+                val finalList = (firebaseAndLocal + getLocalPlaces())
+                    .distinctBy { it.id }
+
+                _allPlaces.value = finalList
 
             } catch (e: Exception) {
-                _allPlaces.value = getLocalPlaces()
+                // Si Firebase falla → solo Room + locales
+                val cached = repo.getHomePlaces()
+                _allPlaces.value = cached + getLocalPlaces()
             }
         }
     }
@@ -48,7 +61,7 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.8,
-            image = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg",
+            imageUrl = "https://www.civitatis.com/f/bolivia/cochabamba/tour-cochabamba-cristo-concordia-589x392.jpg",
             latitude = -17.376000,
             longitude = -66.156818
         ),
@@ -59,20 +72,9 @@ class SearchViewModel(app: Application) : AndroidViewModel(app) {
             city = "Cochabamba",
             department = "Cochabamba",
             rating = 4.6,
-            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
+            imageUrl = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2024/10/21/2024102122033078671.jpg",
             latitude = -17.374950,
             longitude = -66.164116
-        ),
-        PlaceDto(
-            id = "laguna_alalay",
-            name = "Laguna Alalay",
-            description = "Laguna natural en el corazón de la ciudad.",
-            city = "Cochabamba",
-            department = "Cochabamba",
-            rating = 4.5,
-            image = "https://www.opinion.com.bo/asset/thumbnail,992,558,center,center/media/opinion/images/2023/03/12/2023031220545699714.jpg",
-            latitude = -17.403204,
-            longitude = -66.145481
         )
     )
 }
