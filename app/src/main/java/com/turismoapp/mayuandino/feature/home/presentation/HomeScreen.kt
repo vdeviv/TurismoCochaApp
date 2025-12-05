@@ -46,6 +46,8 @@ import com.turismoapp.mayuandino.feature.home.viewmodel.HomeUiState
 import com.turismoapp.mayuandino.feature.home.viewmodel.HomeViewModel
 import com.turismoapp.mayuandino.feature.home.viewmodel.HomeViewModelFactory
 import com.turismoapp.mayuandino.framework.dto.PlaceDto
+import com.turismoapp.mayuandino.R
+
 
 
 @Composable

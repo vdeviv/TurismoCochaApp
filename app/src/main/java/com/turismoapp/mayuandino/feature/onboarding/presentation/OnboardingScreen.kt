@@ -18,6 +18,8 @@ import com.turismoapp.mayuandino.ui.theme.GreenMayu
 import com.turismoapp.mayuandino.ui.theme.RedMayu
 import com.turismoapp.mayuandino.ui.theme.YellowMayu
 import kotlinx.coroutines.launch
+import com.turismoapp.mayuandino.R
+
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
