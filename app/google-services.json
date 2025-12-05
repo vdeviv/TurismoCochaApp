@@ -41,6 +41,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:520083069036:android:87a77a56fd7b025487a049",
+        "android_client_info": {
+          "package_name": "com.turismoapp.mayuandino"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "520083069036-m15dnsl5md6ulhk11sftp9esif4p7094.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsdTm1FxV4Q61_6Xi2HwznMk4q8W79xrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "520083069036-m15dnsl5md6ulhk11sftp9esif4p7094.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

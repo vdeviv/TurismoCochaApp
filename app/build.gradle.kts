@@ -15,11 +15,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.turismoapp"
+    namespace = "com.turismoapp.mayuandino"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.turismoapp"
+        applicationId = "com.turismoapp.mayuandino"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
