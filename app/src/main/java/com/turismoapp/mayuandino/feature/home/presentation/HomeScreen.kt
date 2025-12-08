@@ -1,7 +1,6 @@
 package com.turismoapp.mayuandino.feature.home.presentation
 
 import android.app.Application
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,26 +12,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,67 +31,104 @@ import com.turismoapp.mayuandino.feature.home.viewmodel.HomeViewModel
 import com.turismoapp.mayuandino.feature.home.viewmodel.HomeViewModelFactory
 import com.turismoapp.mayuandino.framework.dto.PlaceDto
 import com.turismoapp.mayuandino.R
+import com.turismoapp.mayuandino.feature.profile.presentation.ProfileViewModel
+import org.koin.androidx.compose.koinViewModel
 
-
+// COLORES MAYU
+import com.turismoapp.mayuandino.ui.theme.RedMayu
+import com.turismoapp.mayuandino.ui.theme.YellowMayu
+import com.turismoapp.mayuandino.ui.theme.GreenMayu
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
+import com.turismoapp.mayuandino.ui.theme.BeigeMayu
+import com.turismoapp.mayuandino.ui.theme.TextBlack
+import com.turismoapp.mayuandino.ui.theme.GrayText
+import com.turismoapp.mayuandino.ui.theme.WhiteBackground
 
 @Composable
 fun HomeScreen(
     onProfileClick: () -> Unit,
     onNotificationClick: () -> Unit,
-    onPlaceClick: (String) -> Unit,
+    onPlaceClick: (String) -> Unit
 ) {
+
+    // ---------------- HOME VIEWMODEL ----------------
     val context = LocalContext.current
     val application = context.applicationContext as Application
-    val factory = remember { HomeViewModelFactory(application) }
-    val viewModel: HomeViewModel = viewModel(factory = factory)
-
-    val state by viewModel.ui.collectAsState()
+    val homeVM: HomeViewModel = viewModel(factory = HomeViewModelFactory(application))
+    val state by homeVM.ui.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.refresh()
+        homeVM.refresh()
     }
+
+    // ---------------- PROFILE VIEWMODEL ----------------
+    val profileVM: ProfileViewModel = koinViewModel()
+    val profileState by profileVM.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        profileVM.loadProfile()
+    }
+
+    // ---------------- DATOS DINÁMICOS DEL PERFIL ----------------
+
+    val (displayName, photoUrl) = when (profileState) {
+        is ProfileViewModel.ProfileUiState.Success -> {
+            val p = (profileState as ProfileViewModel.ProfileUiState.Success).profile
+            val name = p.name.ifBlank { "Viajero Anónimo" }
+            val url = p.pathUrl.ifBlank { "https://cdn-icons-png.flaticon.com/512/149/149071.png" }
+            name to url
+        }
+        else -> {
+            "Viajero Anónimo" to "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+        }
+    }
+
+    // ---------------------------- UI ------------------------------------------
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(WhiteBackground)
             .padding(horizontal = 20.dp)
     ) {
 
-        // ------------ HEADER ------------
+        // ---------------- HEADER DINÁMICO ----------------
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp, bottom = 16.dp),
+                .padding(top = 24.dp, bottom = 16.dp)
+                .clickable { onProfileClick() },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onProfileClick() }
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Perfil",
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
+
                 Spacer(Modifier.width(12.dp))
+
                 Text(
-                    text = "Jairo Montaño",
+                    text = displayName,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextBlack
                     )
                 )
             }
 
-            IconButton(onClick = { onNotificationClick() }) {
+            IconButton(onClick = onNotificationClick) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notificaciones",
-                    tint = Color.Black,
+                    tint = TextBlack,
                     modifier = Modifier.size(26.dp)
                 )
             }
@@ -118,18 +139,19 @@ fun HomeScreen(
             text = "Explora la hermosa",
             style = MaterialTheme.typography.titleLarge.copy(
                 fontSize = 22.sp,
+                color = TextBlack,
                 fontWeight = FontWeight.SemiBold
             )
         )
         Text(
             text = "Cochabamba!",
             style = MaterialTheme.typography.displaySmall.copy(
-                color = Color(0xFFD32F2F),
+                color = RedMayu,
                 fontWeight = FontWeight.ExtraBold
             )
         )
         HorizontalDivider(
-            color = Color(0xFFD32F2F),
+            color = RedMayu,
             thickness = 3.dp,
             modifier = Modifier
                 .width(160.dp)
@@ -145,26 +167,27 @@ fun HomeScreen(
             Text(
                 "Los mejores destinos",
                 style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextBlack
                 )
             )
             Text(
                 "Ver más",
-                color = Color(0xFF7A1CAC),
-                modifier = Modifier.clickable { },
+                color = PurpleMayu,
+                modifier = Modifier.clickable { }
             )
         }
 
         Spacer(Modifier.height(12.dp))
 
-        // ---------- ESTADOS ----------
+        // ---------- LISTA DE DESTINOS ----------
         when (state) {
 
             is HomeUiState.Loading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { CircularProgressIndicator() }
+                ) { CircularProgressIndicator(color = PurpleMayu) }
             }
 
             is HomeUiState.Error -> {
@@ -175,11 +198,11 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = (state as HomeUiState.Error).message,
-                        color = Color.Red
+                        color = RedMayu
                     )
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { viewModel.refresh() }) {
-                        Text("Reintentar")
+                    Button(onClick = { homeVM.refresh() }) {
+                        Text("Reintentar", color = TextBlack)
                     }
                 }
             }
@@ -228,7 +251,8 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                     Text(
                         place.name,
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = TextBlack
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -240,18 +264,18 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                         Icon(
                             painter = painterResource(id = android.R.drawable.ic_menu_mylocation),
                             contentDescription = null,
-                            tint = Color.Gray,
+                            tint = GrayText,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(Modifier.width(6.dp))
-                        Text(place.city, color = Color.Gray)
+                        Text(place.city, color = GrayText)
                     }
 
                     Spacer(Modifier.height(12.dp))
 
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFFFF3E0)
+                        color = BeigeMayu
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -259,11 +283,11 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                         ) {
                             Text("⭐", fontSize = 14.sp)
                             Spacer(Modifier.width(6.dp))
-                            // En la función DestinationCard, busca esta línea:
+
                             Text(
                                 "%.1f".format(place.rating),
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF6F00)
+                                color = YellowMayu
                             )
                         }
                     }
@@ -276,12 +300,12 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
                     .align(Alignment.TopEnd)
                     .padding(12.dp)
                     .size(36.dp)
-                    .background(Color.White.copy(alpha = 0.9f), CircleShape)
+                    .background(WhiteBackground.copy(alpha = 0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = if (isBookmarked.value) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                     contentDescription = "Bookmark",
-                    tint = if (isBookmarked.value) Color(0xFFD32F2F) else Color.Gray
+                    tint = if (isBookmarked.value) RedMayu else GrayText
                 )
             }
         }
