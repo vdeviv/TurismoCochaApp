@@ -41,6 +41,18 @@ import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 // Koin
 import org.koin.androidx.compose.koinViewModel
 
+import com.turismoapp.mayuandino.feature.splash.presentation.SplashScreen
+// ...
+import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
+
+// 🎯 NUEVAS IMPORTACIONES DE NOTIFICACIONES 🎯
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModel
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationScreen
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModelFactory
+
+
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,9 +161,26 @@ fun AppNavigation() {
             composable(Screen.Home.route) {
                 HomeScreen(
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
-                    onNotificationClick = {},
+                    onNotificationClick = { navController.navigate(Screen.Notifications.route) },
                     onPlaceClick = { id ->
                         navController.navigate(Screen.DetailPlace.create(id))
+                    }
+                )
+            }
+
+            composable(Screen.Notifications.route) { // Ruta: "notification"
+                val application = LocalContext.current.applicationContext as Application
+
+                // Instanciamos el ViewModel
+                val viewModel: NotificationViewModel = viewModel(
+                    factory = NotificationViewModelFactory(application)
+                )
+
+                // ⬇️ LLAMAR AL COMPONENTE DE LA PANTALLA ⬇️
+                NotificationScreen(
+                    viewModel = viewModel,
+                    onBackClick = {
+                        navController.popBackStack() // Para volver a la pantalla anterior
                     }
                 )
             }
