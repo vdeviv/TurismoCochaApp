@@ -44,6 +44,9 @@ import com.turismoapp.mayuandino.feature.login.domain.usecase.ValidateEmailUseCa
 import com.turismoapp.mayuandino.feature.login.domain.usecase.ValidatePasswordUseCase
 import com.google.firebase.auth.FirebaseAuth
 
+
+import com.turismoapp.mayuandino.utils.saveFcmTokenToFirestore
+
 val PrimaryPurple = PurpleMayu
 val BackgroundGray = WhiteBackground
 val TextGray = GrayText
@@ -134,6 +137,7 @@ fun RegisterScreen(
     LaunchedEffect(uiState.success) {
         if (uiState.success) {
             Toast.makeText(context, "¡Cuenta creada exitosamente!", Toast.LENGTH_SHORT).show()
+            saveFcmTokenToFirestore()
             onRegistrationSuccess()
         }
     }

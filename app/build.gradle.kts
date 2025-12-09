@@ -81,6 +81,8 @@ dependencies {
     implementation(libs.bundles.firebase)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.messaging)
+
 
     // --- GOOGLE SIGN-IN ---
     implementation("com.google.android.gms:play-services-auth:21.2.0")

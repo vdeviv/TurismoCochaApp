@@ -75,9 +75,11 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 # ✅ FIREBASE - Dependencias corregidas
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database" }
-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+
 
 # Accompanist Pager
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
