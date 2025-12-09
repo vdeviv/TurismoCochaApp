@@ -22,6 +22,10 @@ sealed class Screen(val route: String) {
     object Calendar      : Screen("calendar")
     object Search        : Screen("search")
     object Packages      : Screen("packages")
+    object PackageDetail : Screen("packageDetail/{id}") {
+        fun create(id: String) = "packageDetail/$id"
+    }
+
     data object Register : Screen("register")
     object DetailPlace : Screen("detail/{placeId}") {
         fun create(placeId: String) = "detail/$placeId"

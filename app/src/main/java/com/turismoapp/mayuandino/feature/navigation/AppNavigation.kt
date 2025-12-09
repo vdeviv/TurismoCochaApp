@@ -1,6 +1,5 @@
 package com.turismoapp.mayuandino.feature.navigation
 
-// Compose
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-// Navigation
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,10 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
-// Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-// UI Screens
 import com.turismoapp.mayuandino.feature.splash.presentation.SplashScreen
 import com.turismoapp.mayuandino.feature.onboarding.presentation.OnboardingScreen
 import com.turismoapp.mayuandino.feature.login.presentation.LoginScreen
@@ -38,7 +34,10 @@ import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 
-// Koin
+// PACKAGES
+import com.turismoapp.mayuandino.feature.packages.presentation.PackagesScreen
+import com.turismoapp.mayuandino.feature.packages.presentation.PackagesViewModel
+import com.turismoapp.mayuandino.feature.packages.presentation.PackageDetailScreen
 import org.koin.androidx.compose.koinViewModel
 
 import com.turismoapp.mayuandino.feature.splash.presentation.SplashScreen
@@ -60,7 +59,6 @@ fun AppNavigation() {
 
     val navController = rememberNavController()
 
-    // SEARCH VIEWMODEL
     val searchVM: SearchViewModel = viewModel()
     val allPlaces by searchVM.allPlaces.collectAsState()
 
@@ -151,13 +149,11 @@ fun AppNavigation() {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }
                     },
-                    onBackToLogin = {
-                        navController.navigate(Screen.Login.route)
-                    }
+                    onBackToLogin = { navController.navigate(Screen.Login.route) }
                 )
             }
 
-            // ---------------- HOME (NUEVO) ----------------
+            // ---------------- HOME ----------------
             composable(Screen.Home.route) {
                 HomeScreen(
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
@@ -188,10 +184,7 @@ fun AppNavigation() {
             // ---------------- CALENDAR ----------------
             composable(Screen.Calendar.route) {
                 val calendarVM: CalendarViewModel = koinViewModel()
-                CalendarScreen(
-                    navController = navController,
-                    viewModel = calendarVM
-                )
+                CalendarScreen(navController, calendarVM)
             }
 
             // ---------------- MOVIES ----------------
@@ -216,18 +209,41 @@ fun AppNavigation() {
                 )
             }
 
-            // ---------------- EDIT PROFILE ----------------
             composable(Screen.EditProfile.route) {
-                EditProfileScreen(
-                    onBack = { navController.popBackStack() }
-                )
+                EditProfileScreen(onBack = { navController.popBackStack() })
             }
 
-            // RUTAS SIMPLES
-            composable(Screen.Favorites.route) { Text("Favoritos") }
-            composable(Screen.Trips.route) { Text("Mis Viajes") }
-            composable(Screen.Settings.route) { Text("Configuración") }
-            composable(Screen.Language.route) { Text("Idioma") }
+            // ---------------- PACKAGES ----------------
+            composable(Screen.Packages.route) {
+                val vm: PackagesViewModel = koinViewModel()
+                PackagesScreen(
+                    viewModel = vm,
+                    onPackageClick = { id ->
+                        navController.navigate(Screen.PackageDetail.create(id))
+                    }
+                )
+            }
+// ----------- PACKAGE DETAIL -----------
+            composable(
+                route = Screen.PackageDetail.route,
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) { backStackEntry ->
+
+                val id = backStackEntry.arguments?.getString("id") ?: ""
+
+                val vm: PackagesViewModel = koinViewModel()
+                val state by vm.state.collectAsState()
+                val pkg = state.packages.find { it.id == id }
+
+                if (pkg != null) {
+                    PackageDetailScreen(
+                        pkg = pkg,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
+
+
 
             // ---------------- DETAIL PLACE ----------------
             composable(
