@@ -4,20 +4,24 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.turismoapp.mayuandino.framework.local.entity.CalendarEventEntity
 
 fun DocumentSnapshot.toCalendarEventEntity(): CalendarEventEntity? {
-    val date = getString("date") ?: return null
-    val title = getString("title") ?: return null
-    val location = getString("location") ?: ""
-    val description = getString("description") ?: ""
-    val imageUrl = getString("imageUrl") ?: ""
-    val price = getDouble("price") ?: 0.0
+
+    val id = this.id
+
+    val date = this.getString("date") ?: return null
+    val title = this.getString("title") ?: return null
+    val location = this.getString("location") ?: ""
+    val description = this.getString("description") ?: ""
+    val imageUrl = this.getString("imageUrl") ?: ""
+    val price = this.getLong("price")?.toDouble() ?: 0.0
 
     return CalendarEventEntity(
-        id = 0L,
+        id = id,
+        date = date,
         title = title,
         location = location,
         price = price,
-        date = date,
         description = description,
         imageUrl = imageUrl
+
     )
 }

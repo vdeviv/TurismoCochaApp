@@ -100,29 +100,7 @@ val appModule = module {
     }
 
     // --------------------------------------------------
-    // RETROFIT - GITHUB
-    // --------------------------------------------------
-    single(named(NetworkConstants.RETROFIT_GITHUB)) {
-        Retrofit.Builder()
-            .baseUrl(NetworkConstants.GITHUB_BASE_URL)
-            .client(get())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    // --------------------------------------------------
-    // RETROFIT - MOVIES
-    // --------------------------------------------------
-    single(named(NetworkConstants.RETROFIT_MOVIE)) {
-        Retrofit.Builder()
-            .baseUrl(NetworkConstants.MOVIE_BASE_URL)
-            .client(get())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    // --------------------------------------------------
-    // FIREBASE SINGLETONS
+    // FIREBASE
     // --------------------------------------------------
     single { FirebaseAuth.getInstance() }
     single { FirebaseFirestore.getInstance() }
@@ -132,18 +110,6 @@ val appModule = module {
     // AUTH
     // --------------------------------------------------
     single<IAuthRepository> { AuthRepository(get()) }
-
-    // --------------------------------------------------
-    // GITHUB MODULE
-    // --------------------------------------------------
-    single<GithubService> {
-        get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
-            .create(GithubService::class.java)
-    }
-    single { GithubRemoteDataSource(get()) }
-    single<IGithubRepository> { GithubRepository(get()) }
-    factory { FindByNickNameUseCase(get()) }
-    viewModel { GithubViewModel(get(), get()) }
 
     // --------------------------------------------------
     // PROFILE
@@ -164,67 +130,40 @@ val appModule = module {
     }
 
     // --------------------------------------------------
-    // ROOM DATABASE PRINCIPAL
+    // CALENDAR DATABASE (Room del Calendario)
     // --------------------------------------------------
     single { AppDatabase.getInstance(get()) }
     single { get<AppDatabase>().calendarEventDao() }
 
-    // --------------------------------------------------
-    // CALENDAR
-    // --------------------------------------------------
+    // Calendar local repository
     single<CalendarEventRepository> { CalendarEventRepositoryImpl(get()) }
 
-    single {
-        CalendarRepository(
-            firestore = get(),
-            dao = get()
-        )
-    }
+    // Calendar Firebase sync
+    single { CalendarRepository(firestore = get(), dao = get()) }
 
+    // UseCases
     factory { GetEventsByDateUseCase(get()) }
     factory { InsertCalendarEventUseCase(get()) }
 
     viewModel {
         CalendarViewModel(
             getEventsByDate = get(),
-            insertEvent = get()
+            insertEventUseCase = get()
         )
     }
 
     // --------------------------------------------------
-    // DOLLAR (su propia DB)
+    // DOLLAR DATABASE (su propia base AppRoomDatabase)
     // --------------------------------------------------
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
+
     single { RealTimeRemoteDataSource() }
     single { DollarLocalDataSource(get()) }
     single<IDollarRepository> { DollarRepository(get(), get()) }
+
     factory { FetchDollarUseCase(get()) }
     viewModel { DollarViewModel(get()) }
-
-    // --------------------------------------------------
-    // MOVIES
-    // --------------------------------------------------
-    single(named("apiKey")) {
-        androidApplication().getString(R.string.api_key)
-    }
-    single<MovieService> {
-        get<Retrofit>(named(NetworkConstants.RETROFIT_MOVIE))
-            .create(MovieService::class.java)
-    }
-    single { MovieRemoteDataSource(get(), get(named("apiKey"))) }
-    single<IMoviesRepository> { MovieRepository(get()) }
-    factory { FetchPopularMoviesUseCase(get()) }
-    viewModel { PopularMoviesViewModel(get()) }
-
-    // --------------------------------------------------
-    // ONBOARDING
-    // --------------------------------------------------
-    single { OnboardingDataStore(get()) }
-    single<IOnboardingRepository> { OnboardingRepository(get()) }
-    factory { IsOnboardingCompletedUseCase(get()) }
-    factory { SaveOnboardingCompletedUseCase(get()) }
-    viewModel { OnboardingViewModel(get(), get()) }
 
     // --------------------------------------------------
     // HOME PLACES
@@ -237,4 +176,5 @@ val appModule = module {
     single<IPackagesRepository> { PackagesRepository(get()) }
     factory { GetPackageUseCase(get()) }
     viewModel { PackagesViewModel(get()) }
+
 }
