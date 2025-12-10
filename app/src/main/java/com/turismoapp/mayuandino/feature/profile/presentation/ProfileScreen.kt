@@ -186,11 +186,9 @@ private fun SuccessView(
 
             // Opciones de cuenta
             Spacer(Modifier.height(16.dp))
-            Text("Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Text("Eliminar Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
             Spacer(Modifier.height(8.dp))
 
-            Text("Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
-            Spacer(Modifier.height(8.dp))
 
             MenuOption(
                 title = "Eliminar Cuenta",
@@ -199,13 +197,8 @@ private fun SuccessView(
                 onClick = onDeleteAccount
             )
 
-            MenuOption(
-                title = "Eliminar Cuenta",
-                icon = Icons.Outlined.Delete,
-                isDestructive = true,
-                onClick = onDeleteAccount
-            )
         }
+        
     }
 }
 
