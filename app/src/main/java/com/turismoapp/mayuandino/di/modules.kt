@@ -26,6 +26,7 @@ import com.turismoapp.mayuandino.feature.movie.presentation.PopularMoviesViewMod
 // Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.storage.FirebaseStorage
 
 // Auth
@@ -58,6 +59,7 @@ import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 
 // Calendar — FIREBASE SYNC
 import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarRepository
+import com.turismoapp.mayuandino.feature.config.ConfigViewModel
 
 // Places (Home)
 import com.turismoapp.mayuandino.feature.home.data.FirebaseHomeService
@@ -179,4 +181,11 @@ val appModule = module {
     factory { GetPackageUseCase(get()) }
     viewModel { PackagesViewModel(get()) }
 
+
+
+    // --- REMOTE CONFIG ---
+    single { FirebaseRemoteConfig.getInstance() }
+    viewModel { ConfigViewModel(get()) }
+
 }
+
