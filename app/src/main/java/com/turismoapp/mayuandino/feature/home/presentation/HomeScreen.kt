@@ -310,4 +310,5 @@ fun DestinationCard(place: PlaceDto, onClick: () -> Unit) {
             }
         }
     }
+
 }

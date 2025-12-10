@@ -17,6 +17,9 @@ import com.turismoapp.mayuandino.R
 // ⬇️ NUEVAS IMPORTACIONES
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.turismoapp.mayuandino.feature.notification.data.model.LocalNotification
 
 class FirebaseService: FirebaseMessagingService() {
 
@@ -105,5 +108,33 @@ class FirebaseService: FirebaseMessagingService() {
         }
 
         notificationManager.notify(0, notificationBuilder.build())
+    }
+
+    // Archivo: FirebaseService.kt (Añadir estas funciones)
+
+// ... (después de tus funciones existentes) ...
+
+    private fun saveNotificationLocally(title: String, body: String) {
+        val prefs = getSharedPreferences("noti_prefs", MODE_PRIVATE)
+        val gson = Gson() // Necesitas la dependencia de Gson para serialización
+
+        val currentJson = prefs.getString("notifications_list", "[]")
+        val type = object : TypeToken<MutableList<LocalNotification>>() {}.type
+        val notificationList: MutableList<LocalNotification> = gson.fromJson(currentJson, type)
+
+        val newNotification = LocalNotification(title = title, body = body)
+        notificationList.add(0, newNotification) // Añadir al principio para que sea reciente
+
+        prefs.edit().putString("notifications_list", gson.toJson(notificationList)).apply()
+        Log.d("NOTI_LOCAL", "Notificación guardada localmente: $title")
+    }
+
+    // Modifica onMessageReceived para llamar al guardado:
+    override fun onMessageReceived(message: RemoteMessage) {
+        super.onMessageReceived(message)
+        message.notification?.let {
+            sendNotification(it.title, it.body)
+            saveNotificationLocally(it.title ?: "Notificación", it.body ?: "") // ⬅️ LLAMADA A GUARDAR
+        }
     }
 }

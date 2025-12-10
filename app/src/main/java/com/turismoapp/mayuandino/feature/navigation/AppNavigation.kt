@@ -30,6 +30,7 @@ import com.turismoapp.mayuandino.feature.profile.presentation.ProfileScreen
 import com.turismoapp.mayuandino.feature.search.presentation.SearchViewModel
 import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
 
+// Calendar
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 
@@ -38,6 +39,19 @@ import com.turismoapp.mayuandino.feature.packages.presentation.PackagesScreen
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesViewModel
 import com.turismoapp.mayuandino.feature.packages.presentation.PackageDetailScreen
 import org.koin.androidx.compose.koinViewModel
+
+import com.turismoapp.mayuandino.feature.splash.presentation.SplashScreen
+// ...
+import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
+
+// 🎯 NUEVAS IMPORTACIONES DE NOTIFICACIONES 🎯
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModel
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationScreen
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModelFactory
+
+
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +73,7 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
+    // RUTAS SIN BOTTOM BAR
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -68,6 +83,7 @@ fun AppNavigation() {
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
+
 
     Scaffold(
         bottomBar = {
@@ -141,9 +157,26 @@ fun AppNavigation() {
             composable(Screen.Home.route) {
                 HomeScreen(
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
-                    onNotificationClick = {},
+                    onNotificationClick = { navController.navigate(Screen.Notifications.route) },
                     onPlaceClick = { id ->
                         navController.navigate(Screen.DetailPlace.create(id))
+                    }
+                )
+            }
+
+            composable(Screen.Notifications.route) { // Ruta: "notification"
+                val application = LocalContext.current.applicationContext as Application
+
+                // Instanciamos el ViewModel
+                val viewModel: NotificationViewModel = viewModel(
+                    factory = NotificationViewModelFactory(application)
+                )
+
+                // ⬇️ LLAMAR AL COMPONENTE DE LA PANTALLA ⬇️
+                NotificationScreen(
+                    viewModel = viewModel,
+                    onBackClick = {
+                        navController.popBackStack() // Para volver a la pantalla anterior
                     }
                 )
             }
