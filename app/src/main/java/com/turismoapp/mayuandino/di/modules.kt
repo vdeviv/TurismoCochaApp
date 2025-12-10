@@ -145,23 +145,33 @@ val appModule = module {
             get(), get(), get(), get(), get(), get()
         )
     }
-    // ---------- CALENDAR ----------
-    // 1) ROOM DATABASE (calendario)
+    // ---------- CALENDAR MODULE ----------
     single { AppDatabase.getInstance(get()) }
-
-    // 2) DAO
     single { get<AppDatabase>().calendarEventDao() }
 
-    // 3) REPO LOCAL (Room)
+// Repo local (Room)
     single<CalendarEventRepository> { CalendarEventRepositoryImpl(get()) }
 
-    // 4) REPO FIREBASE → ROOM (sync automático)
+// Repo de sincronización Firebase → Room
     single {
         CalendarRepository(
             firestore = get(),
             dao = get()
         )
     }
+
+// UseCases
+    factory { GetEventsByDateUseCase(get()) }
+    factory { InsertCalendarEventUseCase(get()) }
+
+// ViewModel CORRECTO con los nombres exactos
+    viewModel {
+        CalendarViewModel(
+            getEventsByDate = get(),
+            insertEvent = get()
+        )
+    }
+
     // Dollar
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
