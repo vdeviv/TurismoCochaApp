@@ -1,120 +1,110 @@
-// app/src/main/java/com/turismoapp/mayuandino/feature/calendar/presentation/CalendarScreen.kt
 package com.turismoapp.mayuandino.feature.calendar.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.turismoapp.mayuandino.feature.calendar.presentation.components.MiniCalendar
+
 import com.turismoapp.mayuandino.feature.calendar.presentation.components.EventCard
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.*
+import com.turismoapp.mayuandino.feature.calendar.presentation.components.MiniCalendar
+
+// ---------------- IMPORTS DE COLORES ----------------
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
+import com.turismoapp.mayuandino.ui.theme.GrayText
+
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun CalendarScreen(
     navController: NavController,
     viewModel: CalendarViewModel
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState().value
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
     ) {
 
-        // ----- Header mes -----
-        MonthHeader(
-            currentMonth = state.currentMonth,
-            onPrevious = { viewModel.previousMonth() },
-            onNext = { viewModel.nextMonth() }
-        )
+        // -------------------- HEADER --------------------
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "<",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.clickable { viewModel.previousMonth() }
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                uiState.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                style = MaterialTheme.typography.headlineMedium
+            )
 
-        // ----- Mini calendario -----
+            Text(
+                ">",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.clickable { viewModel.nextMonth() }
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // -------------------- MINI CALENDARIO --------------------
         MiniCalendar(
-            currentMonth = state.currentMonth,
-            selectedDate = state.selectedDate,
+            currentMonth = uiState.currentMonth,
+            selectedDate = uiState.selectedDate,
+            eventDays = uiState.eventDays,
             onDayClick = { viewModel.onDaySelected(it) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(32.dp))
 
+        // -------------------- TÍTULO "MI CALENDARIO" --------------------
         Text(
-            text = "Mi calendario",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
+            "Mi calendario",
+            style = MaterialTheme.typography.headlineSmall,
+            color = PurpleMayu
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
-        when {
-            state.isLoading -> {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            state.events.isEmpty() -> {
+        // -------------------- EVENTOS --------------------
+        if (uiState.events.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    "No hay actividades registradas para este día.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    "No hay actividades para esta fecha.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = GrayText
                 )
             }
-
-            else -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(state.events) { event ->
-                        EventCard(
-                            event = event,
-                            onClick = {
-                                navController.navigate("event_detail/${event.id}")
-                            }
-                        )
-                    }
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(uiState.events) { event ->
+                    EventCard(
+                        event = event,
+                        onClick = {
+                            navController.navigate("eventDetail/${event.id}")
+                        }
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun MonthHeader(
-    currentMonth: LocalDate,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            "<",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.clickable { onPrevious() }
-        )
-
-        Text(
-            text = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-                .replaceFirstChar { it.titlecase() } + " " + currentMonth.year,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            ">",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.clickable { onNext() }
-        )
     }
 }

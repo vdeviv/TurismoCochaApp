@@ -1,48 +1,85 @@
 package com.turismoapp.mayuandino.feature.calendar.presentation.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
 
 @Composable
 fun EventDetailScreen(
-    eventId: Long,
+    eventId: String,
     viewModel: CalendarViewModel
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val event = state.events.find { it.id == eventId }
+    val event = viewModel.getEventById(eventId)
 
     if (event == null) {
-        Text(
-            text = "Evento no encontrado",
-            modifier = Modifier.padding(20.dp)
-        )
+        Column(Modifier.fillMaxSize().padding(20.dp)) {
+            Text(
+                text = "Evento no encontrado",
+                color = Color.Red,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
+    ) {
 
         AsyncImage(
             model = event.imageUrl,
             contentDescription = event.title,
-            modifier = Modifier.fillMaxWidth().height(220.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(260.dp),
             contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
 
-        Text(event.title, style = MaterialTheme.typography.headlineSmall)
-        Text(event.location ?: "", style = MaterialTheme.typography.bodyMedium)
-        Text("Precio: Bs. ${event.price}", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            event.title,
+            style = MaterialTheme.typography.headlineSmall
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(6.dp))
 
-        Text(event.description ?: "", style = MaterialTheme.typography.bodyLarge)
+        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Place,
+                contentDescription = "Ubicación",
+                tint = PurpleMayu
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(event.location ?: "", style = MaterialTheme.typography.bodyMedium)
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            "Precio: Bs. ${event.price}",
+            style = MaterialTheme.typography.titleMedium,
+            color = PurpleMayu
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        Text(
+            event.description ?: "Sin descripción disponible.",
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }

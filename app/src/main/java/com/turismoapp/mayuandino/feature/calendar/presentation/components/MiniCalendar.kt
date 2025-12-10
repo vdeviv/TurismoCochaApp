@@ -10,25 +10,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
+import com.turismoapp.mayuandino.ui.theme.GreenMayu
 import java.time.LocalDate
 
 @Composable
 fun MiniCalendar(
     currentMonth: LocalDate,
     selectedDate: LocalDate,
+    eventDays: Set<LocalDate>,
     onDayClick: (LocalDate) -> Unit
 ) {
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDay = currentMonth.withDayOfMonth(1).dayOfWeek.value % 7
 
     Column {
+
+        // Header de días
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             listOf("L", "M", "X", "J", "V", "S", "D").forEach {
-                Text(it, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                Text(it, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -42,24 +48,40 @@ fun MiniCalendar(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 for (col in 0 until 7) {
+
                     if (row == 0 && col < firstDay || day > daysInMonth) {
                         Box(Modifier.size(40.dp))
                     } else {
+
                         val date = currentMonth.withDayOfMonth(day)
                         val isSelected = date == selectedDate
+                        val hasEvents = eventDays.contains(date)
 
-                        Box(
+                        Column(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                    else MaterialTheme.colorScheme.surface
+                                    if (isSelected)
+                                        PurpleMayu.copy(alpha = 0.25f)
+                                    else
+                                        MaterialTheme.colorScheme.surface
                                 )
                                 .clickable { onDayClick(date) },
-                            contentAlignment = Alignment.Center
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(day.toString())
+
+                            if (hasEvents) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(GreenMayu)
+                                )
+                            }
                         }
 
                         day++

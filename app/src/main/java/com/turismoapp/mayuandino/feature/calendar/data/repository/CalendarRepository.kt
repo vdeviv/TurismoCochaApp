@@ -13,13 +13,13 @@ class CalendarRepository(
 ) {
 
     suspend fun syncCalendarEvents() = withContext(Dispatchers.IO) {
+
         val snapshot = firestore.collection("calendar_events")
             .get()
             .await()
 
         val entities = snapshot.documents.mapNotNull { it.toCalendarEventEntity() }
 
-        dao.clear()
         if (entities.isNotEmpty()) {
             dao.insertEvents(entities)
         }

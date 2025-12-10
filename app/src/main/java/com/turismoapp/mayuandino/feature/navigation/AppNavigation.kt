@@ -35,6 +35,7 @@ import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarRepository
+import com.turismoapp.mayuandino.feature.calendar.presentation.components.EventDetailScreen
 
 // PACKAGES
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesScreen
@@ -190,11 +191,37 @@ fun AppNavigation() {
                 )
             }
 
-            // ---------------- CALENDAR ----------------
+            // ----------------------- CALENDAR -----------------------
             composable(Screen.Calendar.route) {
+
                 val vm: CalendarViewModel = koinViewModel()
-                CalendarScreen(navController, vm)
+                val repo: CalendarRepository = get()
+
+                LaunchedEffect(Unit) {
+                    repo.syncCalendarEvents()
+                }
+
+                CalendarScreen(navController = navController, viewModel = vm)
             }
+
+// ----------------------- EVENT DETAIL -----------------------
+            composable(
+                route = "eventDetail/{eventId}",
+                arguments = listOf(
+                    navArgument("eventId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+
+                val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+
+                val vm: CalendarViewModel = koinViewModel()
+
+                EventDetailScreen(
+                    eventId = eventId,
+                    viewModel = vm
+                )
+            }
+
 
             // ---------------- MOVIES ----------------
             composable(Screen.PopularMovies.route) {
