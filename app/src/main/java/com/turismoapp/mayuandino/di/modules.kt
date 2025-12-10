@@ -52,6 +52,7 @@ import com.turismoapp.mayuandino.feature.onboarding.presentation.OnboardingViewM
 import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarEventRepositoryImpl
 import com.turismoapp.mayuandino.feature.calendar.domain.repository.CalendarEventRepository
 import com.turismoapp.mayuandino.feature.calendar.domain.usecase.GetEventsByDateUseCase
+import com.turismoapp.mayuandino.feature.calendar.domain.usecase.GetEventsByMonthUseCase
 import com.turismoapp.mayuandino.feature.calendar.domain.usecase.InsertCalendarEventUseCase
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 
@@ -143,15 +144,16 @@ val appModule = module {
 
     // UseCases
     factory { GetEventsByDateUseCase(get()) }
+    factory { GetEventsByMonthUseCase(get()) }
     factory { InsertCalendarEventUseCase(get()) }
 
     viewModel {
         CalendarViewModel(
             getEventsByDate = get(),
+            getEventsByMonth = get(),
             insertEventUseCase = get()
         )
     }
-
     // --------------------------------------------------
     // DOLLAR DATABASE (su propia base AppRoomDatabase)
     // --------------------------------------------------

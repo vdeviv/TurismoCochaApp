@@ -9,5 +9,6 @@ data class CalendarUiState(
     val events: List<CalendarEvent> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val eventsOfMonth: List<CalendarEvent> = emptyList()
+    val eventsOfMonth: List<CalendarEvent> = emptyList(),
+    val eventDays: Set<LocalDate> = emptySet()
 )

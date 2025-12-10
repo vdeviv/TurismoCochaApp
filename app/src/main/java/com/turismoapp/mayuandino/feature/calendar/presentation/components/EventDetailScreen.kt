@@ -13,21 +13,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
 
 @Composable
 fun EventDetailScreen(
     eventId: String,
     viewModel: CalendarViewModel
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val event = state.events.find { it.id == eventId }
+    val event = viewModel.getEventById(eventId)
 
     if (event == null) {
-        Text(
-            text = "Evento no encontrado",
-            modifier = Modifier.padding(20.dp),
-            color = Color.Red
-        )
+        Column(Modifier.fillMaxSize().padding(20.dp)) {
+            Text(
+                text = "Evento no encontrado",
+                color = Color.Red,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
         return
     }
 
@@ -37,7 +39,6 @@ fun EventDetailScreen(
             .padding(20.dp)
     ) {
 
-        // Imagen principal
         AsyncImage(
             model = event.imageUrl,
             contentDescription = event.title,
@@ -47,42 +48,35 @@ fun EventDetailScreen(
             contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(20.dp))
 
-        // Título
         Text(
             event.title,
             style = MaterialTheme.typography.headlineSmall
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(Modifier.height(6.dp))
 
-        // Ubicación
         Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Default.Place,
                 contentDescription = "Ubicación",
-                tint = MaterialTheme.colorScheme.primary
+                tint = PurpleMayu
             )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                event.location ?: "",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Spacer(Modifier.width(6.dp))
+            Text(event.location ?: "", style = MaterialTheme.typography.bodyMedium)
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(Modifier.height(12.dp))
 
-        // Precio
         Text(
             "Precio: Bs. ${event.price}",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = PurpleMayu
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(20.dp))
 
-        // Descripción
         Text(
             event.description ?: "Sin descripción disponible.",
             style = MaterialTheme.typography.bodyLarge

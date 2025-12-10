@@ -22,83 +22,90 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.turismoapp.mayuandino.feature.calendar.domain.model.CalendarEvent
 import java.time.format.DateTimeFormatter
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CalendarToday
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+
+// Tus colores Mayu
+import com.turismoapp.mayuandino.ui.theme.BeigeMayu
+import com.turismoapp.mayuandino.ui.theme.GrayText
+import com.turismoapp.mayuandino.ui.theme.PurpleMayu
+
 
 @Composable
 fun EventCard(
     event: CalendarEvent,
     onClick: () -> Unit
 ) {
-    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = BeigeMayu),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.padding(12.dp)) {
 
-            // Imagen redondeada
             AsyncImage(
                 model = event.imageUrl,
                 contentDescription = event.title,
                 modifier = Modifier
-                    .size(70.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(Modifier.weight(1f)) {
 
-                // Fecha + ícono
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.CalendarMonth,
+                        imageVector = Icons.Default.CalendarToday,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = PurpleMayu,
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(Modifier.width(6.dp))
+
                     Text(
-                        text = event.date.format(formatter),
-                        style = MaterialTheme.typography.bodySmall
+                        event.date.format(DateTimeFormatter.ofPattern("d MMMM yyyy")),
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(Modifier.height(6.dp))
 
-                // Título
                 Text(
                     event.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(Modifier.height(6.dp))
 
-                // Ubicación
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Place,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = PurpleMayu,
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        event.location ?: "",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(event.location ?: "", color = GrayText)
                 }
             }
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
+                imageVector = Icons.Default.ArrowForward,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = PurpleMayu,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
