@@ -20,6 +20,8 @@ import coil.compose.AsyncImage
 import com.turismoapp.mayuandino.feature.profile.domain.model.ProfileModel
 import com.turismoapp.mayuandino.feature.profile.presentation.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,10 +112,12 @@ private fun SuccessView(
     onSignOut: () -> Unit,
     onDeleteAccount: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
+            .verticalScroll(scrollState)
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -186,7 +190,7 @@ private fun SuccessView(
 
             // Opciones de cuenta
             Spacer(Modifier.height(16.dp))
-            Text("Eliminar Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Text("Opciones de cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
             Spacer(Modifier.height(8.dp))
 
 
@@ -198,7 +202,7 @@ private fun SuccessView(
             )
 
         }
-        
+
     }
 }
 
