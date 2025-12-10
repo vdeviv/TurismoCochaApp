@@ -26,7 +26,7 @@ import com.turismoapp.mayuandino.feature.movie.presentation.PopularMoviesViewMod
 // Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-//import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.storage.FirebaseStorage
 
 // Auth
@@ -184,8 +184,8 @@ val appModule = module {
 
 
     // --- REMOTE CONFIG ---
-    //single { FirebaseRemoteConfig.getInstance() }
-    //viewModel { ConfigViewModel(get()) }
+    single { FirebaseRemoteConfig.getInstance() }
+    viewModel { ConfigViewModel(get()) }
 
 }
 
