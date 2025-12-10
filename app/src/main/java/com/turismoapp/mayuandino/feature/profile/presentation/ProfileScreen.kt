@@ -18,8 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.turismoapp.mayuandino.feature.profile.domain.model.ProfileModel
+import com.turismoapp.mayuandino.feature.profile.presentation.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -48,7 +50,16 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Mi Perfil") }
+                title = { Text("Mi Perfil") },
+                actions = {
+                    IconButton(onClick = onSignOut) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
+                            contentDescription = "Cerrar Sesión",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -68,12 +79,19 @@ fun ProfileScreen(
             }
             is ProfileViewModel.ProfileUiState.Success -> {
                 val profile = (state as ProfileViewModel.ProfileUiState.Success).profile
+
+                // ⬇️ FUNCIÓN QUE CIERRA SESIÓN Y ACTIVA REDIRECCIÓN ⬇️
+                val combinedSignOut: () -> Unit = {
+                    profileViewModel.signOut() // 1. Cierra la sesión en Firebase (asíncrono)
+                    onSignOut() // 2. Ejecuta la navegación a Login (síncrono)
+                }
+
                 SuccessView(
                     padding = padding,
                     profile = profile,
                     onEditProfileClick = onEditProfileClick,
-                    onSignOut = profileViewModel::signOut, // Llama a la función del ViewModel
-                    onDeleteAccount = profileViewModel::deleteAccount // Llama a la función del ViewModel
+                    onSignOut = combinedSignOut, // ⬅️ Pasa la función combinada
+                    onDeleteAccount = { profileViewModel.deleteAccount() }
                 )
             }
         }
@@ -171,11 +189,16 @@ private fun SuccessView(
             Text("Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
             Spacer(Modifier.height(8.dp))
 
+            Text("Cuenta", style = MaterialTheme.typography.titleMedium, color = Color.Gray)
+            Spacer(Modifier.height(8.dp))
+
             MenuOption(
-                title = "Cerrar Sesión",
-                icon = Icons.Outlined.ExitToApp,
-                onClick = onSignOut
+                title = "Eliminar Cuenta",
+                icon = Icons.Outlined.Delete,
+                isDestructive = true,
+                onClick = onDeleteAccount
             )
+
             MenuOption(
                 title = "Eliminar Cuenta",
                 icon = Icons.Outlined.Delete,

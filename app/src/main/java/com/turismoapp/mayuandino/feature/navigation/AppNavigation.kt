@@ -194,23 +194,37 @@ fun AppNavigation() {
 
             // ---------------- PROFILE ----------------
             composable(Screen.Profile.route) {
+                // 💡 Aquí se usaba onDeleteAccount y onSignOut
+
+                // Define la acción de cierre de sesión
+                val signOutAction: () -> Unit = {
+                    // Navegar a Login y limpiar la pila
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+
+                // Define la acción de eliminación de cuenta (misma lógica de navegación)
+                val deleteAccountAction: () -> Unit = {
+                    // Navegar a Login y limpiar la pila
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+
                 ProfileScreen(
                     onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
-                    onSignOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    },
-                    onDeleteAccount = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    }
+
+                    // ⬇️ PASAMOS LA ACCIÓN DE NAVEGACIÓN A LA PANTALLA
+                    onSignOut = signOutAction,
+                    onDeleteAccount = deleteAccountAction
                 )
             }
 
             composable(Screen.EditProfile.route) {
-                EditProfileScreen(onBack = { navController.popBackStack() })
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             // ---------------- PACKAGES ----------------
