@@ -51,24 +51,16 @@ import com.turismoapp.mayuandino.feature.notification.presentation.NotificationV
 
 import android.app.Application
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation() {
 
     val navController = rememberNavController()
 
-    // -------------------------------------------------------------------
-    // 🔄 SINCRONIZACIÓN DE CALENDARIO (solo una vez al iniciar la app)
-    // -------------------------------------------------------------------
-    val calendarRepo: CalendarRepository = get()
-
-    LaunchedEffect(Unit) {
-        calendarRepo.syncCalendarEvents()
-    }
-
-    // -------------------------------------------------------------------
+    // ---------------------------------------
     // SEARCH VIEWMODEL
-    // -------------------------------------------------------------------
+    // ---------------------------------------
     val searchVM: SearchViewModel = viewModel()
     val allPlaces by searchVM.allPlaces.collectAsState()
 
@@ -83,7 +75,9 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
-    // Rutas que NO deben mostrar bottom bar
+    // ---------------------------------------
+    // BOTTOM BAR VISIBILITY
+    // ---------------------------------------
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -93,6 +87,7 @@ fun AppNavigation() {
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
+
 
     Scaffold(
         bottomBar = {
@@ -105,12 +100,14 @@ fun AppNavigation() {
         }
     ) { innerPadding ->
 
+
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
             modifier = Modifier.padding(innerPadding)
         ) {
 
+            // ---------------- SPLASH ----------------
             composable(Screen.Splash.route) {
                 SplashScreen(
                     onNavigateNext = {
@@ -121,6 +118,7 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- ONBOARDING ----------------
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onSkip = {
@@ -136,6 +134,7 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- LOGIN ----------------
             composable(Screen.Login.route) {
                 LoginScreen(
                     onSuccess = {
@@ -147,6 +146,7 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- REGISTER ----------------
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onRegistrationSuccess = {
@@ -160,7 +160,17 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- HOME + SYNC ----------------
             composable(Screen.Home.route) {
+
+                val calendarRepo: CalendarRepository = get()
+
+                LaunchedEffect(Unit) {
+                    try {
+                        calendarRepo.syncCalendarEvents()
+                    } catch (_: Exception) { }
+                }
+
                 HomeScreen(
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
                     onNotificationClick = { navController.navigate(Screen.Notifications.route) },
@@ -170,10 +180,12 @@ fun AppNavigation() {
                 )
             }
 
-            // NOTIFICATIONS
+            // ---------------- NOTIFICATIONS ----------------
             composable(Screen.Notifications.route) {
                 val app = LocalContext.current.applicationContext as Application
-                val vm: NotificationViewModel = viewModel(factory = NotificationViewModelFactory(app))
+                val vm: NotificationViewModel = viewModel(
+                    factory = NotificationViewModelFactory(app)
+                )
 
                 NotificationScreen(
                     viewModel = vm,
@@ -181,21 +193,24 @@ fun AppNavigation() {
                 )
             }
 
-            // CALENDAR
+            // ---------------- CALENDAR ----------------
             composable(Screen.Calendar.route) {
                 val vm: CalendarViewModel = koinViewModel()
                 CalendarScreen(navController, vm)
             }
 
-            // MOVIES
+            // ---------------- MOVIES ----------------
             composable(Screen.PopularMovies.route) {
                 PopularMoviesScreen()
             }
 
-            // PROFILE
+
+            // ---------------- PROFILE ----------------
             composable(Screen.Profile.route) {
                 ProfileScreen(
-                    onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
+                    onEditProfileClick = {
+                        navController.navigate(Screen.EditProfile.route)
+                    },
                     onSignOut = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(Screen.Login.route) { inclusive = true }
@@ -209,13 +224,14 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- EDIT PROFILE ----------------
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
 
-            // PACKAGES
+            // ---------------- PACKAGES ----------------
             composable(Screen.Packages.route) {
                 val vm: PackagesViewModel = koinViewModel()
                 PackagesScreen(
@@ -226,14 +242,16 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- PACKAGE DETAIL ----------------
             composable(
                 route = Screen.PackageDetail.route,
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) { backStackEntry ->
+
                 val id = backStackEntry.arguments?.getString("id") ?: ""
                 val vm: PackagesViewModel = koinViewModel()
-
                 val state by vm.state.collectAsState()
+
                 val pkg = state.packages.find { it.id == id }
 
                 if (pkg != null) {
@@ -244,11 +262,12 @@ fun AppNavigation() {
                 }
             }
 
-            // DETAIL PLACE
+            // ---------------- DETAIL PLACE ----------------
             composable(
                 route = Screen.DetailPlace.route,
                 arguments = listOf(navArgument("placeId") { type = NavType.StringType })
             ) { backStackEntry ->
+
                 val placeId = backStackEntry.arguments?.getString("placeId") ?: ""
                 val place = allPlaces.find { it.id == placeId }
 
@@ -259,20 +278,24 @@ fun AppNavigation() {
                     )
                 }
             }
+
         }
     }
 
-    // SEARCH PANEL
+    // ---------------- SEARCH PANEL ----------------
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },
             sheetState = sheetState
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(20.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
             ) {
 
                 Text("Buscar destinos", style = MaterialTheme.typography.titleMedium)
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 TextField(

@@ -14,13 +14,13 @@ import com.turismoapp.mayuandino.framework.local.entity.DestinationEntity
         DestinationEntity::class,
         CalendarEventEntity::class
     ],
-    version = 2, // ✅ Cambiar de 1 a 2
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun destinationDao(): DestinationDao
-    abstract fun calendarEventDao(): CalendarEventDao // Si lo tienes
+    abstract fun calendarEventDao(): CalendarEventDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null

@@ -47,6 +47,7 @@ import com.turismoapp.mayuandino.feature.onboarding.domain.repository.IOnboardin
 import com.turismoapp.mayuandino.feature.onboarding.domain.usecase.IsOnboardingCompletedUseCase
 import com.turismoapp.mayuandino.feature.onboarding.domain.usecase.SaveOnboardingCompletedUseCase
 import com.turismoapp.mayuandino.feature.onboarding.presentation.OnboardingViewModel
+
 // Calendar — LOCAL
 import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarEventRepositoryImpl
 import com.turismoapp.mayuandino.feature.calendar.domain.repository.CalendarEventRepository
@@ -57,15 +58,16 @@ import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 // Calendar — FIREBASE SYNC
 import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarRepository
 
-
-// Home Service para PLACES
+// Places (Home)
 import com.turismoapp.mayuandino.feature.home.data.FirebaseHomeService
 
-// PACKAGES MODULE
+// Packages
 import com.turismoapp.mayuandino.feature.packages.data.repository.PackagesRepository
 import com.turismoapp.mayuandino.feature.packages.domain.repository.IPackagesRepository
 import com.turismoapp.mayuandino.feature.packages.domain.usecase.GetPackageUseCase
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesViewModel
+
+// Room Database Principal
 import com.turismoapp.mayuandino.framework.local.db.AppDatabase
 
 import okhttp3.OkHttpClient
@@ -86,6 +88,9 @@ object NetworkConstants {
 
 val appModule = module {
 
+    // --------------------------------------------------
+    // HTTP CLIENT
+    // --------------------------------------------------
     single {
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -94,7 +99,9 @@ val appModule = module {
             .build()
     }
 
-    // --- Retrofit GitHub ---
+    // --------------------------------------------------
+    // RETROFIT - GITHUB
+    // --------------------------------------------------
     single(named(NetworkConstants.RETROFIT_GITHUB)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.GITHUB_BASE_URL)
@@ -103,7 +110,9 @@ val appModule = module {
             .build()
     }
 
-    // --- Retrofit Movies ---
+    // --------------------------------------------------
+    // RETROFIT - MOVIES
+    // --------------------------------------------------
     single(named(NetworkConstants.RETROFIT_MOVIE)) {
         Retrofit.Builder()
             .baseUrl(NetworkConstants.MOVIE_BASE_URL)
@@ -112,15 +121,21 @@ val appModule = module {
             .build()
     }
 
-    // Firebase
+    // --------------------------------------------------
+    // FIREBASE SINGLETONS
+    // --------------------------------------------------
     single { FirebaseAuth.getInstance() }
     single { FirebaseFirestore.getInstance() }
     single { FirebaseStorage.getInstance() }
 
-    // Auth
+    // --------------------------------------------------
+    // AUTH
+    // --------------------------------------------------
     single<IAuthRepository> { AuthRepository(get()) }
 
-    // GitHub
+    // --------------------------------------------------
+    // GITHUB MODULE
+    // --------------------------------------------------
     single<GithubService> {
         get<Retrofit>(named(NetworkConstants.RETROFIT_GITHUB))
             .create(GithubService::class.java)
@@ -130,7 +145,9 @@ val appModule = module {
     factory { FindByNickNameUseCase(get()) }
     viewModel { GithubViewModel(get(), get()) }
 
-    // Profile
+    // --------------------------------------------------
+    // PROFILE
+    // --------------------------------------------------
     single<IProfileRepository> { ProfileRepository(get()) }
     single<IStorageRepository> { StorageRepositoryImpl(get()) }
 
@@ -145,14 +162,18 @@ val appModule = module {
             get(), get(), get(), get(), get(), get()
         )
     }
-    // ---------- CALENDAR MODULE ----------
+
+    // --------------------------------------------------
+    // ROOM DATABASE PRINCIPAL
+    // --------------------------------------------------
     single { AppDatabase.getInstance(get()) }
     single { get<AppDatabase>().calendarEventDao() }
 
-// Repo local (Room)
+    // --------------------------------------------------
+    // CALENDAR
+    // --------------------------------------------------
     single<CalendarEventRepository> { CalendarEventRepositoryImpl(get()) }
 
-// Repo de sincronización Firebase → Room
     single {
         CalendarRepository(
             firestore = get(),
@@ -160,11 +181,9 @@ val appModule = module {
         )
     }
 
-// UseCases
     factory { GetEventsByDateUseCase(get()) }
     factory { InsertCalendarEventUseCase(get()) }
 
-// ViewModel CORRECTO con los nombres exactos
     viewModel {
         CalendarViewModel(
             getEventsByDate = get(),
@@ -172,7 +191,9 @@ val appModule = module {
         )
     }
 
-    // Dollar
+    // --------------------------------------------------
+    // DOLLAR (su propia DB)
+    // --------------------------------------------------
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
     single { RealTimeRemoteDataSource() }
@@ -181,7 +202,9 @@ val appModule = module {
     factory { FetchDollarUseCase(get()) }
     viewModel { DollarViewModel(get()) }
 
-    // Movies
+    // --------------------------------------------------
+    // MOVIES
+    // --------------------------------------------------
     single(named("apiKey")) {
         androidApplication().getString(R.string.api_key)
     }
@@ -194,17 +217,23 @@ val appModule = module {
     factory { FetchPopularMoviesUseCase(get()) }
     viewModel { PopularMoviesViewModel(get()) }
 
-    // Onboarding
+    // --------------------------------------------------
+    // ONBOARDING
+    // --------------------------------------------------
     single { OnboardingDataStore(get()) }
     single<IOnboardingRepository> { OnboardingRepository(get()) }
     factory { IsOnboardingCompletedUseCase(get()) }
     factory { SaveOnboardingCompletedUseCase(get()) }
     viewModel { OnboardingViewModel(get(), get()) }
 
-    // --- HOME SERVICE (places) ---
+    // --------------------------------------------------
+    // HOME PLACES
+    // --------------------------------------------------
     single { FirebaseHomeService() }
 
-    // --- PACKAGES MODULE ---
+    // --------------------------------------------------
+    // PACKAGES
+    // --------------------------------------------------
     single<IPackagesRepository> { PackagesRepository(get()) }
     factory { GetPackageUseCase(get()) }
     viewModel { PackagesViewModel(get()) }
