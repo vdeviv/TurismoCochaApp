@@ -10,6 +10,7 @@ data class CalendarEventEntity(
     val title: String,
     val location: String?,
     val price: Double,
-    val date: String,           // yyyy-MM-dd
-    val description: String? = null
+    val date: String,
+    val description: String?,
+    val imageUrl: String
 )

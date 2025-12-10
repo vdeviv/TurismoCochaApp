@@ -47,6 +47,16 @@ import com.turismoapp.mayuandino.feature.onboarding.domain.repository.IOnboardin
 import com.turismoapp.mayuandino.feature.onboarding.domain.usecase.IsOnboardingCompletedUseCase
 import com.turismoapp.mayuandino.feature.onboarding.domain.usecase.SaveOnboardingCompletedUseCase
 import com.turismoapp.mayuandino.feature.onboarding.presentation.OnboardingViewModel
+// Calendar — LOCAL
+import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarEventRepositoryImpl
+import com.turismoapp.mayuandino.feature.calendar.domain.repository.CalendarEventRepository
+import com.turismoapp.mayuandino.feature.calendar.domain.usecase.GetEventsByDateUseCase
+import com.turismoapp.mayuandino.feature.calendar.domain.usecase.InsertCalendarEventUseCase
+import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
+
+// Calendar — FIREBASE SYNC
+import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarRepository
+
 
 // Home Service para PLACES
 import com.turismoapp.mayuandino.feature.home.data.FirebaseHomeService
@@ -56,6 +66,7 @@ import com.turismoapp.mayuandino.feature.packages.data.repository.PackagesReposi
 import com.turismoapp.mayuandino.feature.packages.domain.repository.IPackagesRepository
 import com.turismoapp.mayuandino.feature.packages.domain.usecase.GetPackageUseCase
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesViewModel
+import com.turismoapp.mayuandino.framework.local.db.AppDatabase
 
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
@@ -134,7 +145,23 @@ val appModule = module {
             get(), get(), get(), get(), get(), get()
         )
     }
+    // ---------- CALENDAR ----------
+    // 1) ROOM DATABASE (calendario)
+    single { AppDatabase.getInstance(get()) }
 
+    // 2) DAO
+    single { get<AppDatabase>().calendarEventDao() }
+
+    // 3) REPO LOCAL (Room)
+    single<CalendarEventRepository> { CalendarEventRepositoryImpl(get()) }
+
+    // 4) REPO FIREBASE → ROOM (sync automático)
+    single {
+        CalendarRepository(
+            firestore = get(),
+            dao = get()
+        )
+    }
     // Dollar
     single { AppRoomDatabase.getDatabase(get()) }
     single { get<AppRoomDatabase>().dollarDao() }
