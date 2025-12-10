@@ -1,4 +1,5 @@
 package com.turismoapp.mayuandino.feature.calendar.data.repository
+
 import com.turismoapp.mayuandino.framework.local.dao.CalendarEventDao
 import com.turismoapp.mayuandino.framework.local.entity.CalendarEventEntity
 import com.turismoapp.mayuandino.feature.calendar.domain.model.CalendarEvent
@@ -23,8 +24,7 @@ class CalendarEventRepositoryImpl(
 
     override fun getEventsByMonth(year: Int, month: Int): Flow<List<CalendarEvent>> {
         val monthStr = "%02d".format(month)
-        val prefix = "$year-$monthStr"
-        return dao.getEventsByMonth(prefix).map { list ->
+        return dao.getEventsByMonth("$year-$monthStr").map { list ->
             list.map { it.toDomain() }
         }
     }
@@ -40,10 +40,10 @@ class CalendarEventRepositoryImpl(
             location = location,
             price = price,
             date = LocalDate.parse(date, formatter),
-            description = description
+            description = description,
+            imageUrl = imageUrl
         )
     }
-
     private fun CalendarEvent.toEntity(): CalendarEventEntity {
         return CalendarEventEntity(
             id = id,
@@ -51,7 +51,8 @@ class CalendarEventRepositoryImpl(
             location = location,
             price = price,
             date = date.format(formatter),
-            description = description
+            description = description,
+            imageUrl = imageUrl
         )
     }
 }

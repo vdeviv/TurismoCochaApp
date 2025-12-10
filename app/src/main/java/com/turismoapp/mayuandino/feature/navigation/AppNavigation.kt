@@ -8,6 +8,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 import androidx.navigation.NavType
@@ -33,25 +34,23 @@ import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
 // Calendar
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarScreen
 import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
+import com.turismoapp.mayuandino.feature.calendar.data.repository.CalendarRepository
 
 // PACKAGES
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesScreen
 import com.turismoapp.mayuandino.feature.packages.presentation.PackagesViewModel
 import com.turismoapp.mayuandino.feature.packages.presentation.PackageDetailScreen
+
 import org.koin.androidx.compose.koinViewModel
+import org.koin.androidx.compose.get
 
-import com.turismoapp.mayuandino.feature.splash.presentation.SplashScreen
-// ...
-import com.turismoapp.mayuandino.feature.search.presentation.PlaceDetailScreen
-
-// 🎯 NUEVAS IMPORTACIONES DE NOTIFICACIONES 🎯
-import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModel
+// Notifications
 import com.turismoapp.mayuandino.feature.notification.presentation.NotificationScreen
+import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModel
 import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModelFactory
 
-
 import android.app.Application
-import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +58,9 @@ fun AppNavigation() {
 
     val navController = rememberNavController()
 
+    // ---------------------------------------
+    // SEARCH VIEWMODEL
+    // ---------------------------------------
     val searchVM: SearchViewModel = viewModel()
     val allPlaces by searchVM.allPlaces.collectAsState()
 
@@ -149,12 +151,23 @@ fun AppNavigation() {
                             popUpTo(Screen.Register.route) { inclusive = true }
                         }
                     },
-                    onBackToLogin = { navController.navigate(Screen.Login.route) }
+                    onBackToLogin = {
+                        navController.navigate(Screen.Login.route)
+                    }
                 )
             }
 
-            // ---------------- HOME ----------------
+            // ---------------- HOME + SYNC ----------------
             composable(Screen.Home.route) {
+
+                val calendarRepo: CalendarRepository = get()
+
+                LaunchedEffect(Unit) {
+                    try {
+                        calendarRepo.syncCalendarEvents()
+                    } catch (_: Exception) { }
+                }
+
                 HomeScreen(
                     onProfileClick = { navController.navigate(Screen.Profile.route) },
                     onNotificationClick = { navController.navigate(Screen.Notifications.route) },
@@ -164,33 +177,30 @@ fun AppNavigation() {
                 )
             }
 
-            composable(Screen.Notifications.route) { // Ruta: "notification"
-                val application = LocalContext.current.applicationContext as Application
-
-                // Instanciamos el ViewModel
-                val viewModel: NotificationViewModel = viewModel(
-                    factory = NotificationViewModelFactory(application)
+            // ---------------- NOTIFICATIONS ----------------
+            composable(Screen.Notifications.route) {
+                val app = LocalContext.current.applicationContext as Application
+                val vm: NotificationViewModel = viewModel(
+                    factory = NotificationViewModelFactory(app)
                 )
 
-                // ⬇️ LLAMAR AL COMPONENTE DE LA PANTALLA ⬇️
                 NotificationScreen(
-                    viewModel = viewModel,
-                    onBackClick = {
-                        navController.popBackStack() // Para volver a la pantalla anterior
-                    }
+                    viewModel = vm,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
 
             // ---------------- CALENDAR ----------------
             composable(Screen.Calendar.route) {
-                val calendarVM: CalendarViewModel = koinViewModel()
-                CalendarScreen(navController, calendarVM)
+                val vm: CalendarViewModel = koinViewModel()
+                CalendarScreen(navController, vm)
             }
 
             // ---------------- MOVIES ----------------
             composable(Screen.PopularMovies.route) {
                 PopularMoviesScreen()
             }
+
 
             // ---------------- PROFILE ----------------
             composable(Screen.Profile.route) {
@@ -221,6 +231,7 @@ fun AppNavigation() {
                 )
             }
 
+            // ---------------- EDIT PROFILE ----------------
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(
                     onBack = { navController.popBackStack() }
@@ -237,16 +248,17 @@ fun AppNavigation() {
                     }
                 )
             }
-// ----------- PACKAGE DETAIL -----------
+
+            // ---------------- PACKAGE DETAIL ----------------
             composable(
                 route = Screen.PackageDetail.route,
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) { backStackEntry ->
 
                 val id = backStackEntry.arguments?.getString("id") ?: ""
-
                 val vm: PackagesViewModel = koinViewModel()
                 val state by vm.state.collectAsState()
+
                 val pkg = state.packages.find { it.id == id }
 
                 if (pkg != null) {
@@ -256,8 +268,6 @@ fun AppNavigation() {
                     )
                 }
             }
-
-
 
             // ---------------- DETAIL PLACE ----------------
             composable(
@@ -275,10 +285,11 @@ fun AppNavigation() {
                     )
                 }
             }
+
         }
     }
 
-    // ---------- SEARCH PANEL ----------
+    // ---------------- SEARCH PANEL ----------------
     if (isSearchOpen) {
         ModalBottomSheet(
             onDismissRequest = { isSearchOpen = false },

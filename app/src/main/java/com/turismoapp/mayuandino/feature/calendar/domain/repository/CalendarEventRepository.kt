@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 interface CalendarEventRepository {
+
     fun getEventsByDate(date: LocalDate): Flow<List<CalendarEvent>>
+
     fun getEventsByMonth(year: Int, month: Int): Flow<List<CalendarEvent>>
+
     suspend fun insertEvent(event: CalendarEvent)
 }
