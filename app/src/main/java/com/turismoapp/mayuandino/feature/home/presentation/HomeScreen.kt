@@ -33,6 +33,7 @@ import com.turismoapp.mayuandino.framework.dto.PlaceDto
 import com.turismoapp.mayuandino.R
 import com.turismoapp.mayuandino.feature.profile.presentation.ProfileViewModel
 import org.koin.androidx.compose.koinViewModel
+import com.turismoapp.mayuandino.feature.config.ConfigViewModel
 
 // COLORES MAYU
 import com.turismoapp.mayuandino.ui.theme.RedMayu
@@ -68,7 +69,9 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         profileVM.loadProfile()
     }
-
+    // ---------------- CONFIG VIEWMODEL ----------------
+    val configVM: ConfigViewModel = koinViewModel()
+    val isPromoEnabled by configVM.isPromoEnabled.collectAsState()
     // ---------------- DATOS DINÁMICOS DEL PERFIL ----------------
 
     val (displayName, photoUrl) = when (profileState) {
@@ -218,6 +221,21 @@ fun HomeScreen(
                         )
                     }
                 }
+            }
+        }
+        if (isPromoEnabled) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = YellowMayu.copy(alpha = 0.5f))
+            ) {
+                Text(
+                    text = "🎉 ¡PROMOCIÓN ACTIVA! ¡Descuentos en todos los paquetes!",
+                    modifier = Modifier.padding(12.dp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextBlack
+                )
             }
         }
     }

@@ -135,4 +135,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // --- FIREBASE ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
+    // ...
+    // AÑADIR LA LIBRERÍA DE REMOTE CONFIG
+    implementation("com.google.firebase:firebase-config-ktx")
 }
