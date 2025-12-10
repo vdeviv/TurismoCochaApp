@@ -75,9 +75,7 @@ fun AppNavigation() {
                 it.city.contains(searchText, ignoreCase = true)
     }
 
-    // ---------------------------------------
-    // BOTTOM BAR VISIBILITY
-    // ---------------------------------------
+    // RUTAS SIN BOTTOM BAR
     val noBottomRoutes = setOf(
         Screen.Splash.route,
         Screen.Onboarding.route,
@@ -99,7 +97,6 @@ fun AppNavigation() {
             }
         }
     ) { innerPadding ->
-
 
         NavHost(
             navController = navController,
@@ -207,20 +204,30 @@ fun AppNavigation() {
 
             // ---------------- PROFILE ----------------
             composable(Screen.Profile.route) {
-                ProfileScreen(
-                    onEditProfileClick = {
-                        navController.navigate(Screen.EditProfile.route)
-                    },
-                    onSignOut = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    },
-                    onDeleteAccount = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
+                // 💡 Aquí se usaba onDeleteAccount y onSignOut
+
+                // Define la acción de cierre de sesión
+                val signOutAction: () -> Unit = {
+                    // Navegar a Login y limpiar la pila
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                     }
+                }
+
+                // Define la acción de eliminación de cuenta (misma lógica de navegación)
+                val deleteAccountAction: () -> Unit = {
+                    // Navegar a Login y limpiar la pila
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+
+                ProfileScreen(
+                    onEditProfileClick = { navController.navigate(Screen.EditProfile.route) },
+
+                    // ⬇️ PASAMOS LA ACCIÓN DE NAVEGACIÓN A LA PANTALLA
+                    onSignOut = signOutAction,
+                    onDeleteAccount = deleteAccountAction
                 )
             }
 

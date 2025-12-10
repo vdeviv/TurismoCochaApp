@@ -156,11 +156,6 @@ class ProfileViewModel(
         }
     }
 
-    // Cerrar sesión
-    fun signOut() {
-        firebaseAuth.signOut()
-        _state.value = ProfileUiState.Init // Reinicia el estado para forzar la redirección
-    }
 
     // Eliminar cuenta completa
     fun deleteAccount() {
@@ -184,5 +179,9 @@ class ProfileViewModel(
                 onFailure = { _state.value = ProfileUiState.Error(it.message ?: "Error al eliminar perfil") }
             )
         }
+    }
+    fun signOut() {
+        firebaseAuth.signOut()
+        _state.value = ProfileUiState.Init // Reinicia el estado para forzar la redirección
     }
 }
