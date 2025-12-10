@@ -1,5 +1,6 @@
 package com.turismoapp.mayuandino.feature.calendar.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,8 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.foundation.clickable
-
 import com.turismoapp.mayuandino.feature.calendar.presentation.components.EventCard
 import com.turismoapp.mayuandino.feature.calendar.presentation.components.MiniCalendar
 import java.time.format.DateTimeFormatter
@@ -71,8 +70,6 @@ fun CalendarScreen(
         )
 
         Spacer(modifier = Modifier.height(12.dp))
-
-        // ------ EVENTOS DEL DÍA ------
         if (uiState.events.isEmpty()) {
             Text("No hay actividades registradas para este día.")
         } else {

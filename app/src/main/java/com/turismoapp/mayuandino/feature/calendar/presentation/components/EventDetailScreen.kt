@@ -16,11 +16,11 @@ import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarViewModel
 
 @Composable
 fun EventDetailScreen(
-    eventId: String,        // ← CAMBIO IMPORTANTE
+    eventId: String,
     viewModel: CalendarViewModel
 ) {
     val state by viewModel.uiState.collectAsState()
-    val event = state.events.find { it.id == eventId } // ← CORRECTO PARA FIREBASE
+    val event = state.events.find { it.id == eventId }
 
     if (event == null) {
         Text(

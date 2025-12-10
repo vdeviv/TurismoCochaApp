@@ -8,5 +8,6 @@ data class CalendarUiState(
     val selectedDate: LocalDate = LocalDate.now(),
     val events: List<CalendarEvent> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val eventsOfMonth: List<CalendarEvent> = emptyList()
 )

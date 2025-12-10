@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
@@ -23,43 +24,50 @@ fun MiniCalendar(
     val firstDay = currentMonth.withDayOfMonth(1).dayOfWeek.value % 7
 
     Column {
+
         Row(
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            listOf("L", "M", "X", "J", "V", "S", "D").forEach {
-                Text(it, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            listOf("L", "M", "X", "J", "V", "S", "D").forEach { day ->
+                Text(day, fontWeight = FontWeight.Bold)
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         var day = 1
 
         for (row in 0 until 6) {
             Row(
-                Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 for (col in 0 until 7) {
+
                     if (row == 0 && col < firstDay || day > daysInMonth) {
-                        Box(Modifier.size(40.dp))
+                        Box(modifier = Modifier.size(40.dp))
                     } else {
                         val date = currentMonth.withDayOfMonth(day)
-                        val isSelected = date == selectedDate
+                        val isSelected = selectedDate == date
 
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                    else MaterialTheme.colorScheme.surface
+                                    if (isSelected)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                    else
+                                        MaterialTheme.colorScheme.surface
                                 )
                                 .clickable { onDayClick(date) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(day.toString())
+                            Text(
+                                text = day.toString(),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
                         }
 
                         day++

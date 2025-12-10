@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.turismoapp.mayuandino.feature.calendar.domain.model.CalendarEvent
 import com.turismoapp.mayuandino.feature.calendar.domain.usecase.GetEventsByDateUseCase
 import com.turismoapp.mayuandino.feature.calendar.domain.usecase.InsertCalendarEventUseCase
-import com.turismoapp.mayuandino.feature.calendar.presentation.CalendarUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -40,10 +39,25 @@ class CalendarViewModel(
     fun nextMonth() {
         val newMonth = _uiState.value.currentMonth.plusMonths(1)
         _uiState.value = _uiState.value.copy(currentMonth = newMonth)
+
+        // Mantener el día seleccionado dentro del nuevo mes
+        val selected = _uiState.value.selectedDate.withMonth(newMonth.monthValue)
+        val safeDate = selected.withDayOfMonth(minOf(selected.dayOfMonth, newMonth.lengthOfMonth()))
+
+        _uiState.value = _uiState.value.copy(selectedDate = safeDate)
+
+        loadEventsForDate(safeDate)
     }
 
     fun previousMonth() {
         val newMonth = _uiState.value.currentMonth.minusMonths(1)
         _uiState.value = _uiState.value.copy(currentMonth = newMonth)
+
+        val selected = _uiState.value.selectedDate.withMonth(newMonth.monthValue)
+        val safeDate = selected.withDayOfMonth(minOf(selected.dayOfMonth, newMonth.lengthOfMonth()))
+
+        _uiState.value = _uiState.value.copy(selectedDate = safeDate)
+
+        loadEventsForDate(safeDate)
     }
 }
