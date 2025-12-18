@@ -16,12 +16,6 @@ class MaintenanceViewModel(
 
     init {
         viewModelScope.launch {
-            repository.observeMaintenanceStatus().collect {
-                _maintenanceMode.value = it
-            }
-        }
-
-        viewModelScope.launch {
             repository.fetchMaintenanceStatus().collect {
                 _maintenanceMode.value = it
             }
