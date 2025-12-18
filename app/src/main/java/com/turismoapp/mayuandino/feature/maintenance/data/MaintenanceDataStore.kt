@@ -11,9 +11,7 @@ val Context.maintenanceDataStore by preferencesDataStore(
     name = "maintenance_preferences"
 )
 
-class MaintenanceDataStore(
-    private val context: Context
-) {
+class MaintenanceDataStore(private val context: Context) {
 
     companion object {
         val MAINTENANCE_MODE = booleanPreferencesKey("maintenance_mode")

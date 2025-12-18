@@ -93,7 +93,10 @@ fun AppNavigation() {
     val maintenanceVM: MaintenanceViewModel = koinViewModel()
     val isMaintenance by maintenanceVM.maintenanceMode.collectAsState()
 
-
+    if (isMaintenance) {
+        MaintenanceOverlay()
+        return
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -108,10 +111,6 @@ fun AppNavigation() {
             }
         ) { innerPadding ->
 
-            if (isMaintenance) {
-                MaintenanceOverlay()
-                return@Scaffold
-            }
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,

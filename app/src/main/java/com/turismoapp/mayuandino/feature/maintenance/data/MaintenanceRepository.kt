@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
+
 class MaintenanceRepository(
     private val remoteConfig: FirebaseRemoteConfig,
     private val dataStore: MaintenanceDataStore
@@ -30,15 +31,19 @@ class MaintenanceRepository(
         try {
             remoteConfig.fetchAndActivate().await()
             val enabled = remoteConfig.getBoolean("maintenance_mode")
+
             dataStore.setMaintenanceMode(enabled)
             emit(enabled)
+
+            Log.d("Maintenance", "maintenance_mode=$enabled")
+
         } catch (e: Exception) {
+            emit(false)
             Log.e("Maintenance", "Error RemoteConfig", e)
-            dataStore.observeMaintenanceMode().collect { emit(it) }
         }
     }
 
-    fun observeMaintenanceStatus(): Flow<Boolean> {
-        return dataStore.observeMaintenanceMode()
-    }
+    fun observeMaintenanceStatus(): Flow<Boolean> =
+        dataStore.observeMaintenanceMode()
+
 }
