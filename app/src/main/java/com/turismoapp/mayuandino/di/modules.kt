@@ -1,13 +1,7 @@
 package com.turismoapp.mayuandino.di
 
 import com.turismoapp.mayuandino.R
-import com.turismoapp.mayuandino.feature.dollar.data.database.AppRoomDatabase
-import com.turismoapp.mayuandino.feature.dollar.data.datasource.DollarLocalDataSource
-import com.turismoapp.mayuandino.feature.dollar.data.datasource.RealTimeRemoteDataSource
-import com.turismoapp.mayuandino.feature.dollar.data.repository.DollarRepository
-import com.turismoapp.mayuandino.feature.dollar.domain.repository.IDollarRepository
-import com.turismoapp.mayuandino.feature.dollar.domain.usecase.FetchDollarUseCase
-import com.turismoapp.mayuandino.feature.dollar.presentation.DollarViewModel
+
 
 import com.turismoapp.mayuandino.feature.github.data.api.GithubService
 import com.turismoapp.mayuandino.feature.github.data.datasource.GithubRemoteDataSource
@@ -16,12 +10,6 @@ import com.turismoapp.mayuandino.feature.github.domain.repository.IGithubReposit
 import com.turismoapp.mayuandino.feature.github.domain.usecase.FindByNickNameUseCase
 import com.turismoapp.mayuandino.feature.github.presentation.GithubViewModel
 
-import com.turismoapp.mayuandino.feature.movie.data.api.MovieService
-import com.turismoapp.mayuandino.feature.movie.data.datasource.MovieRemoteDataSource
-import com.turismoapp.mayuandino.feature.movie.data.repository.MovieRepository
-import com.turismoapp.mayuandino.feature.movie.domain.repository.IMoviesRepository
-import com.turismoapp.mayuandino.feature.movie.domain.usecase.FetchPopularMoviesUseCase
-import com.turismoapp.mayuandino.feature.movie.presentation.PopularMoviesViewModel
 
 // Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -156,18 +144,7 @@ val appModule = module {
             insertEventUseCase = get()
         )
     }
-    // --------------------------------------------------
-    // DOLLAR DATABASE (su propia base AppRoomDatabase)
-    // --------------------------------------------------
-    single { AppRoomDatabase.getDatabase(get()) }
-    single { get<AppRoomDatabase>().dollarDao() }
 
-    single { RealTimeRemoteDataSource() }
-    single { DollarLocalDataSource(get()) }
-    single<IDollarRepository> { DollarRepository(get(), get()) }
-
-    factory { FetchDollarUseCase(get()) }
-    viewModel { DollarViewModel(get()) }
 
     // --------------------------------------------------
     // HOME PLACES

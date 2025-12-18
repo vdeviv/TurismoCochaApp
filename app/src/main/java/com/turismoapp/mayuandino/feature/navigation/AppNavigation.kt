@@ -25,7 +25,6 @@ import com.turismoapp.mayuandino.feature.onboarding.presentation.OnboardingScree
 import com.turismoapp.mayuandino.feature.login.presentation.LoginScreen
 import com.turismoapp.mayuandino.feature.login.presentation.RegisterScreen
 import com.turismoapp.mayuandino.feature.home.presentation.HomeScreen
-import com.turismoapp.mayuandino.feature.movie.presentation.PopularMoviesScreen
 import com.turismoapp.mayuandino.feature.profile.presentation.EditProfileScreen
 import com.turismoapp.mayuandino.feature.profile.presentation.ProfileScreen
 import com.turismoapp.mayuandino.feature.search.presentation.SearchViewModel
@@ -51,6 +50,9 @@ import com.turismoapp.mayuandino.feature.notification.presentation.NotificationV
 import com.turismoapp.mayuandino.feature.notification.presentation.NotificationViewModelFactory
 
 import android.app.Application
+import com.turismoapp.mayuandino.feature.maintenance.presentation.MaintenanceViewModel
+import com.turismoapp.mayuandino.feature.maintenance.presentation.MaintenanceOverlay
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,18 +89,29 @@ fun AppNavigation() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = backStackEntry?.destination?.route !in noBottomRoutes
 
+    //MANTENIMIENTO
+    val maintenanceVM: MaintenanceViewModel = koinViewModel()
+    val isMaintenance by maintenanceVM.maintenanceMode.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                BottomBar(
-                    navController = navController,
-                    onSearchClick = { isSearchOpen = true }
-                )
+
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Scaffold(
+            bottomBar = {
+                if (showBottomBar && !isMaintenance) {
+                    BottomBar(
+                        navController = navController,
+                        onSearchClick = { isSearchOpen = true }
+                    )
+                }
             }
-        }
-    ) { innerPadding ->
+        ) { innerPadding ->
 
+            if (isMaintenance) {
+                MaintenanceOverlay()
+                return@Scaffold
+            }
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
@@ -220,12 +233,6 @@ fun AppNavigation() {
                     eventId = eventId,
                     viewModel = vm
                 )
-            }
-
-
-            // ---------------- MOVIES ----------------
-            composable(Screen.PopularMovies.route) {
-                PopularMoviesScreen()
             }
 
 
@@ -362,8 +369,10 @@ fun AppNavigation() {
                 Button(
                     onClick = { isSearchOpen = false },
                     modifier = Modifier.align(Alignment.End)
-                ) {
+                )
+                    {
                     Text("Cerrar")
+                    }
                 }
             }
         }
