@@ -1,13 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- App -->
     <string name="app_name">TurismoApp</string>
+
+    <!-- Login -->
     <string name="login_title">Sign in</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Sign in</string>
 
+    <!-- Home -->
     <string name="home_welcome_text">Welcome back %s!</string>
+
+    <!-- GitHub -->
     <string name="gitalias_input">Enter the GitHub account</string>
     <string name="gitalias_btn_find">Find</string>
+
+    <!-- Auth / API -->
     <string name="web_client_id">520083069036-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
+
+    <!-- Maintenance -->
+    <string name="maintenance_title">We are under maintenance</string>
+    <string name="maintenance_message">
+        The application is temporarily unavailable.
+        We are working to improve your experience.
+        Please try again later.
+    </string>
+
 </resources>

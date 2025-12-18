@@ -1,21 +1,48 @@
 <resources>
+
+    <!-- App -->
     <string name="app_name">TurismoApp</string>
 
+    <!-- Login -->
     <string name="login_title">Iniciar sesión</string>
     <string name="username">Usuario</string>
     <string name="password">Contraseña</string>
     <string name="login">Entrar</string>
 
+    <!-- Home -->
     <string name="home_welcome_text">¡Bienvenido %s!</string>
+
+    <!-- GitHub -->
     <string name="gitalias_input">Ingresa la cuenta de GitHub</string>
     <string name="gitalias_btn_find">Buscar</string>
 
-    <string name="error_network" translatable="false">Unable to connect to the Internet. Please check your connection.</string>
-    <string name="error_server" translatable="false">A server error occurred. Please try again later.</string>
-    <string name="error_not_found" translatable="false">User not found.</string>
-    <string name="error_empty_response" translatable="false">No response received from the server.</string>
-    <string name="error_unknown" translatable="false">An unexpected error occurred. Please try again.</string>
+    <!-- Errors (NO traducibles) -->
+    <string name="error_network" translatable="false">
+        Unable to connect to the Internet. Please check your connection.
+    </string>
+    <string name="error_server" translatable="false">
+        A server error occurred. Please try again later.
+    </string>
+    <string name="error_not_found" translatable="false">
+        User not found.
+    </string>
+    <string name="error_empty_response" translatable="false">
+        No response received from the server.
+    </string>
+    <string name="error_unknown" translatable="false">
+        An unexpected error occurred. Please try again.
+    </string>
 
+    <!-- Auth / API -->
     <string name="web_client_id">520083069036-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com</string>
     <string name="api_key" translatable="false">fa3e844ce31744388e07fa47c7c5d8c3</string>
+
+    <!-- Maintenance -->
+    <string name="maintenance_title">Estamos en mantenimiento</string>
+    <string name="maintenance_message">
+        La aplicación está temporalmente fuera de servicio.
+        Estamos trabajando para mejorar tu experiencia.
+        Intenta más tarde.
+    </string>
+
 </resources>
